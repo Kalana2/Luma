@@ -16,15 +16,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.text.KeyboardOptions
 import com.example.myapplication.ui.pages_controllers.User
 import com.example.myapplication.ui.pages_controllers.registration
+import com.example.myapplication.ui.utils.ValidationUtils
+import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(onBackClick: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Sign Up") },
@@ -57,7 +65,8 @@ fun SignUpScreen(onBackClick: () -> Unit) {
                 onValueChange = { name = it },
                 label = { Text("Full Name") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -68,7 +77,8 @@ fun SignUpScreen(onBackClick: () -> Unit) {
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -80,26 +90,42 @@ fun SignUpScreen(onBackClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    val newUser = User(
-                        name = name,
-                        email = email,
-                        password = password
-                    )
-                    registration(newUser)
+                    val error = ValidationUtils.validateRegistration(name, email, password)
+                    if (error != null) {
+                        scope.launch { snackbarHostState.showSnackbar(error) }
+                    } else {
+                        isLoading = true
+                        val newUser = User(name, email, password)
+                        registration(newUser) { success, message ->
+                            isLoading = false
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message ?: "An error occurred")
+                                if (success) {
+                                    onBackClick() // Navigate back on success
+                                }
+                            }
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                enabled = !isLoading
             ) {
-                Text("Register", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                if (isLoading) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Register", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
