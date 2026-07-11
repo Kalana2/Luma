@@ -133,9 +133,6 @@ fun DashboardScreen(
                         },
                         actions = {
                             IconButton(onClick = { /* TODO */ }) {
-                                Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.DarkGray)
-                            }
-                            IconButton(onClick = { /* TODO */ }) {
                                 Icon(
                                     imageVector = Icons.Default.AccountCircle,
                                     contentDescription = "Profile",
@@ -175,35 +172,90 @@ fun DashboardScreen(
                         .padding(paddingValues)
                         .padding(horizontal = 24.dp)
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Welcome Home",
+                                fontSize = 18.sp,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = userName,
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2D3243)
+                            )
+                        }
+                        // House Illustration Placeholder
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            modifier = Modifier.size(80.dp),
+                            tint = LumaPrimary.copy(alpha = 0.2f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Energy Expense Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFF0F2FF)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning, // Lightning icon equivalent
+                                    contentDescription = null,
+                                    tint = LumaPrimary
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = "Estimated energy",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "expenses this month",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF2D3243)
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                text = "...",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
                     Text(
                         text = "Smart Home Controller",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    val categories = listOf("Living Room", "Drawing Room", "Kitchen", "Dining", "Office")
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(20.dp),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        itemsIndexed(categories) { index, category ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = category,
-                                    color = if (selectedCategoryIndex == index) Color.Black else Color.Gray,
-                                    fontWeight = if (selectedCategoryIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                    modifier = Modifier.clickable { selectedCategoryIndex = index }
-                                )
-                                if (selectedCategoryIndex == index) {
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Box(modifier = Modifier.width(20.dp).height(2.dp).background(LumaPrimary))
-                                }
-                            }
-                        }
-                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
