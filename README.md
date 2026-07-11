@@ -106,4 +106,4 @@ The project implements strict validation for:
 - **Profile**: Mandatory fields for registration (Phone, Address, Role).
 
 ---
-© 2026 Lumaa Smart Home Project. Developed with ❤️ by Sahan.
+© 2026 Lumaa Smart Home Project. Developed.
