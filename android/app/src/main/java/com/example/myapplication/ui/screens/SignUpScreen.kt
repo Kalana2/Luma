@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(onBackClick: () -> Unit) {
+fun SignUpScreen(onBackClick: () -> Unit, onSignUpSuccess: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -139,7 +139,7 @@ fun SignUpScreen(onBackClick: () -> Unit) {
                             isLoading = false
                             scope.launch {
                                 snackbarHostState.showSnackbar(message ?: "Error")
-                                if (success) onBackClick()
+                                if (success) onSignUpSuccess()
                             }
                         }
                     }
