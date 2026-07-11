@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -8,8 +7,9 @@ import {
   Chip,
   Button,
   Breadcrumbs,
+  alpha,
 } from '@mui/material'
-import { ChevronRight } from '@mui/icons-material'
+import { ChevronRight, Storage, Wifi, WifiOff } from '@mui/icons-material'
 import { seedSampleData } from '../firebase/deviceService'
 
 const floorNames = {
@@ -19,7 +19,6 @@ const floorNames = {
 }
 
 export default function Navbar({ connectionStatus, selectedFloorId }) {
-  const location = useLocation()
   const [seedStatus, setSeedStatus] = useState('idle')
   const [mounted, setMounted] = useState(false)
 
@@ -28,18 +27,19 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
   }, [])
 
   const statusConfig = {
-    connected: { label: 'Connected', color: '#2E8B57', bg: 'rgba(46,139,87,0.12)' },
-    connecting: { label: 'Connecting', color: '#FFA630', bg: 'rgba(255,166,48,0.12)' },
-    error: { label: 'Disconnected', color: '#C0392B', bg: 'rgba(192,57,43,0.12)' },
+    connected: { label: 'Live', color: '#10B981', bg: alpha('#10B981', 0.1), Icon: Wifi },
+    connecting: { label: 'Syncing', color: '#F59E0B', bg: alpha('#F59E0B', 0.1), Icon: Wifi },
+    error: { label: 'Offline', color: '#EF4444', bg: alpha('#EF4444', 0.1), Icon: WifiOff },
   }
-  const status = statusConfig[connectionStatus] || statusConfig.connecting
+  const { label: statusLabel, color: statusColor, bg: statusBg, Icon: StatusIcon } =
+    statusConfig[connectionStatus] || statusConfig.connecting
 
   const handleSeedData = async () => {
     setSeedStatus('loading')
     try {
       await seedSampleData()
       setSeedStatus('success')
-      setTimeout(() => setSeedStatus('idle'), 2000)
+      setTimeout(() => setSeedStatus('idle'), 2500)
     } catch (err) {
       console.error('Seed failed:', err)
       setSeedStatus('error')
@@ -47,67 +47,72 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
     }
   }
 
-  const isDevicePage = location.pathname.includes('/device/')
-
   return (
     <AppBar
       position="fixed"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: 'linear-gradient(90deg, #2F6690, #FFA630, #2E8B57, #2F6690)',
-          backgroundSize: '200% 100%',
-          animation: 'gradient-shift 4s ease-in-out infinite',
-        },
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', minHeight: '64px !important' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', minHeight: '72px !important', px: '24px !important' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <Box
             sx={{
               opacity: mounted ? 1 : 0,
               transform: mounted ? 'translateY(0)' : 'translateY(-8px)',
-              transition: 'all 0.5s ease-out',
+              transition: 'all 0.5s cubic-bezier(0.4,0,0.2,1)',
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
+              gap: 2,
             }}
           >
-            <Box
-              component="img"
-              src="/logo.png"
-              alt=""
-              sx={{
-                width: 72,
-                height: 72,
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 0 14px rgba(47,102,144,0.5))',
-              }}
-            />
+            <Box sx={{ position: 'relative', width: 40, height: 40 }}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: -8,
+                  borderRadius: 12,
+                  background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1))',
+                  filter: 'blur(8px)',
+                }}
+              />
+              <Box
+                component="img"
+                src="/logo.png"
+                alt=""
+                sx={{
+                  position: 'relative',
+                  zIndex: 1,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.4))',
+                }}
+              />
+            </Box>
             <Box>
               <Typography
                 sx={{
                   fontFamily: '"Outfit", sans-serif',
-                  fontSize: '1.15rem',
+                  fontSize: '1.1rem',
                   fontWeight: 700,
                   letterSpacing: '-0.01em',
-                  lineHeight: 1.2,
-                  background: 'linear-gradient(135deg, #E4ECF2, #8892B0)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  lineHeight: 1.3,
+                  color: '#F1F5F9',
                 }}
               >
                 Luma
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ fontSize: '0.6rem', color: '#8892B0', letterSpacing: '0.12em', lineHeight: 1 }}
+                sx={{
+                  fontSize: '0.55rem',
+                  color: '#64748B',
+                  letterSpacing: '0.16em',
+                  lineHeight: 1,
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}
               >
                 Hardware Simulator
               </Typography>
@@ -116,23 +121,17 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
 
           {selectedFloorId && (
             <Breadcrumbs
-              separator={<ChevronRight sx={{ fontSize: 14, color: '#4490B0' }} />}
+              separator={<ChevronRight sx={{ fontSize: 14 }} />}
               sx={{
-                ml: 3,
+                ml: 2,
                 opacity: mounted ? 1 : 0,
                 transition: 'all 0.5s ease-out 0.15s',
-                '& .MuiBreadcrumbs-li': {
-                  fontFamily: '"Outfit", sans-serif',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                },
-                '& .MuiBreadcrumbs-separator': { mx: 0.8 },
               }}
             >
-              <Typography variant="caption" sx={{ color: '#FFA630', fontSize: '0.75rem', textTransform: 'none', letterSpacing: 0 }}>
+              <Typography variant="caption" sx={{ textTransform: 'none', letterSpacing: 0, color: '#64748B', fontWeight: 400 }}>
                 Floors
               </Typography>
-              <Typography variant="caption" sx={{ color: '#8892B0', fontSize: '0.75rem', textTransform: 'none', letterSpacing: 0 }}>
+              <Typography variant="caption" sx={{ textTransform: 'none', letterSpacing: 0, color: '#93C5FD', fontWeight: 600 }}>
                 {floorNames[selectedFloorId] || selectedFloorId}
               </Typography>
             </Breadcrumbs>
@@ -143,104 +142,81 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
           {seedStatus === 'success' ? (
             <Chip
               size="small"
-              label="Seeded"
+              icon={<Storage sx={{ fontSize: 14 }} />}
+              label="Data Seeded"
               sx={{
-                bgcolor: 'rgba(46,139,87,0.12)',
-                color: '#2E8B57',
-                border: '1px solid rgba(46,139,87,0.2)',
+                bgcolor: alpha('#10B981', 0.08),
+                color: '#10B981',
+                border: `1px solid ${alpha('#10B981', 0.15)}`,
                 fontWeight: 600,
+                fontSize: '0.68rem',
+                height: 30,
               }}
             />
           ) : (
             <Button
               variant="outlined"
               size="small"
+              startIcon={<Storage sx={{ fontSize: 15 }} />}
               onClick={handleSeedData}
               disabled={seedStatus === 'loading'}
               sx={{
-                borderColor: 'rgba(255,166,48,0.25)',
-                color: '#FFA630',
-                fontSize: '0.75rem',
-                px: 2.5,
-                py: 0.8,
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': seedStatus === 'loading' ? {
-                  content: '""',
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(90deg, transparent, rgba(255,166,48,0.08), transparent)',
-                  animation: 'shimmer 1.5s ease-in-out infinite',
-                } : {},
+                borderColor: alpha('#3B82F6', 0.2),
+                color: '#94A3B8',
+                fontSize: '0.7rem',
+                px: 2,
+                py: 0.6,
+                height: 32,
+                fontWeight: 500,
+                borderRadius: 8,
+                '&:hover': {
+                  borderColor: alpha('#3B82F6', 0.4),
+                  color: '#93C5FD',
+                  background: alpha('#3B82F6', 0.04),
+                },
+                ...(seedStatus === 'loading' && {
+                  opacity: 0.7,
+                }),
               }}
             >
-              {seedStatus === 'error' ? 'Retry Seed' : seedStatus === 'loading' ? 'Seeding...' : 'Seed Demo Data'}
+              {seedStatus === 'loading' ? 'Seeding...' : 'Seed Data'}
             </Button>
           )}
 
-          <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Chip
-              size="small"
-              label={status.label}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              py: 0.8,
+              px: 1.5,
+              borderRadius: 2.5,
+              bgcolor: statusBg,
+              border: `1px solid ${alpha(statusColor, 0.15)}`,
+            }}
+          >
+            <Box
               sx={{
-                bgcolor: status.bg,
-                color: status.color,
-                border: `1px solid ${status.color}30`,
-                fontWeight: 600,
-                fontFamily: '"Outfit", sans-serif',
-                pr: 1.2,
-                '& .MuiChip-label': { px: 1 },
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                bgcolor: statusColor,
+                boxShadow: connectionStatus === 'connected' ? `0 0 8px ${alpha(statusColor, 0.6)}` : 'none',
+                animation: connectionStatus === 'connected' ? 'status-pulse 2.5s ease-in-out infinite' : 'none',
               }}
-              icon={
-                <Box
-                  sx={{
-                    position: 'relative',
-                    width: 20,
-                    height: 20,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ml: 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: '50%',
-                      bgcolor: status.color,
-                      boxShadow: connectionStatus === 'connected' ? `0 0 10px ${status.color}` : 'none',
-                      animation: connectionStatus === 'connected' ? 'status-pulse 2s ease-in-out infinite' : 'none',
-                    }}
-                  />
-                  {connectionStatus === 'connected' && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        width: 18,
-                        height: 18,
-                        borderRadius: '50%',
-                        border: `1.5px solid ${status.color}40`,
-                        animation: 'rotate-slow 3s linear infinite',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -2,
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: 3,
-                          height: 3,
-                          borderRadius: '50%',
-                          bgcolor: status.color,
-                        }}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              }
             />
+            <Typography
+              variant="caption"
+              sx={{
+                color: statusColor,
+                textTransform: 'none',
+                letterSpacing: '0.04em',
+                fontWeight: 600,
+                fontSize: '0.68rem',
+              }}
+            >
+              {statusLabel}
+            </Typography>
           </Box>
         </Box>
       </Toolbar>

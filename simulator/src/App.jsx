@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import {
   ThemeProvider,
   createTheme,
   Box,
   Typography,
+  alpha,
 } from '@mui/material'
 import { auth, signInAnonymously, onAuthStateChanged } from './firebase/firebaseConfig'
 import Navbar from './components/Navbar'
@@ -13,34 +14,34 @@ import Sidebar from './components/Sidebar'
 const lumaTheme = createTheme({
   palette: {
     mode: 'dark',
-    primary: { main: '#2F6690', light: '#3A7DB0', dark: '#1E4D6E' },
-    secondary: { main: '#16425B', light: '#1D5575', dark: '#0E2F42' },
-    warning: { main: '#FFA630' },
-    success: { main: '#2E8B57' },
-    error: { main: '#C0392B' },
-    background: { default: '#060D1A', paper: 'rgba(15,30,55,0.85)' },
-    text: { primary: '#E4ECF2', secondary: '#8892B0' },
-    divider: 'rgba(47,102,144,0.12)',
+    primary: { main: '#3B82F6', light: '#60A5FA', dark: '#2563EB' },
+    secondary: { main: '#1E293B', light: '#334155', dark: '#0F172A' },
+    warning: { main: '#F59E0B' },
+    success: { main: '#10B981' },
+    error: { main: '#EF4444' },
+    background: { default: '#0B1121', paper: alpha('#111827', 0.8) },
+    text: { primary: '#F1F5F9', secondary: '#94A3B8' },
+    divider: alpha('#3B82F6', 0.08),
   },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    h1: { fontFamily: '"Outfit", sans-serif', fontWeight: 800, letterSpacing: '-0.03em' },
-    h2: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.03em' },
-    h3: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
-    h4: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
+    h1: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
+    h2: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
+    h3: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '-0.02em' },
+    h4: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '-0.01em' },
     h5: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '-0.01em' },
-    h6: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, fontSize: '1.05rem' },
-    body1: { color: '#CCD6E0', fontSize: '0.95rem' },
-    body2: { color: '#8892B0', fontSize: '0.85rem' },
-    caption: { color: '#8892B0', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 500, fontSize: '0.7rem' },
-    button: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'none' },
+    h6: { fontFamily: '"Outfit", sans-serif', fontWeight: 500, fontSize: '1.1rem' },
+    body1: { color: '#CBD5E1' },
+    body2: { color: '#94A3B8', fontSize: '0.875rem' },
+    caption: { color: '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 500, fontSize: '0.7rem' },
+    button: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '0.02em', textTransform: 'none' },
   },
-  shape: { borderRadius: 16 },
+  shape: { borderRadius: 14 },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: '#060D1A',
+          background: '#0B1121',
           minHeight: '100vh',
         },
       },
@@ -48,15 +49,16 @@ const lumaTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(145deg, rgba(15,30,55,0.9) 0%, rgba(20,40,70,0.5) 100%)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(47,102,144,0.12)',
-          borderRadius: 20,
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          background: 'linear-gradient(145deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.7) 100%)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(59,130,246,0.1)',
+          borderRadius: 16,
+          transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            borderColor: 'rgba(255,166,48,0.3)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,166,48,0.08), 0 0 40px rgba(47,102,144,0.1)',
+            transform: 'translateY(-4px)',
+            borderColor: 'rgba(59,130,246,0.3)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.15), 0 0 60px rgba(59,130,246,0.08)',
           },
         },
       },
@@ -64,10 +66,10 @@ const lumaTheme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'rgba(6,13,26,0.8)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderBottom: '1px solid rgba(47,102,144,0.12)',
+          background: alpha('#0B1121', 0.85),
+          backdropFilter: 'blur(20px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+          borderBottom: '1px solid rgba(59,130,246,0.08)',
           boxShadow: 'none',
         },
       },
@@ -75,101 +77,94 @@ const lumaTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: 'rgba(6,13,26,0.9)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderRight: '1px solid rgba(47,102,144,0.1)',
-          boxShadow: '4px 0 40px rgba(0,0,0,0.3)',
+          background: alpha('#0B1121', 0.9),
+          backdropFilter: 'blur(20px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+          borderRight: '1px solid rgba(59,130,246,0.08)',
+          boxShadow: '4px 0 40px rgba(0,0,0,0.4)',
         },
       },
     },
     MuiSwitch: {
       styleOverrides: {
         root: {
-          width: 56,
+          width: 52,
           height: 30,
           padding: 0,
           '& .MuiSwitch-switchBase': {
-            padding: 1,
+            padding: 3,
             '&.Mui-checked': {
-              transform: 'translateX(26px)',
+              transform: 'translateX(22px)',
               '& .MuiSwitch-thumb': {
-                background: 'linear-gradient(135deg, #FFA630, #FF8C00)',
-                boxShadow: '0 0 16px rgba(255,166,48,0.7), 0 2px 8px rgba(0,0,0,0.3)',
+                background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
+                boxShadow: '0 0 16px rgba(59,130,246,0.6), 0 2px 8px rgba(0,0,0,0.3)',
               },
               '& + .MuiSwitch-track': {
                 opacity: 1,
-                background: 'linear-gradient(90deg, rgba(255,166,48,0.3), rgba(255,166,48,0.15))',
-                border: '1px solid rgba(255,166,48,0.2)',
+                background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(99,102,241,0.2))',
               },
             },
           },
           '& .MuiSwitch-thumb': {
-            width: 28,
-            height: 28,
-            background: 'linear-gradient(135deg, #546E7A, #37474F)',
-            transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            width: 24,
+            height: 24,
+            background: '#475569',
+            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
           },
           '& .MuiSwitch-track': {
             borderRadius: 15,
             opacity: 1,
-            background: 'rgba(84,110,122,0.18)',
-            border: '1px solid rgba(84,110,122,0.15)',
+            background: 'rgba(71,85,105,0.25)',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          fontWeight: 600,
+          padding: '10px 22px',
+          letterSpacing: '0.02em',
+          textTransform: 'none',
+          transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+        },
+        containedPrimary: {
+          background: 'linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)',
+          boxShadow: '0 4px 16px rgba(59,130,246,0.35)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #60A5FA 0%, #818CF8 100%)',
+            boxShadow: '0 6px 24px rgba(59,130,246,0.5)',
+            transform: 'translateY(-2px)',
+          },
+        },
+        outlinedPrimary: {
+          borderColor: 'rgba(59,130,246,0.25)',
+          color: '#93C5FD',
+          '&:hover': {
+            borderColor: 'rgba(59,130,246,0.5)',
+            background: 'rgba(59,130,246,0.06)',
           },
         },
       },
     },
     MuiChip: {
       styleOverrides: {
-        root: { fontWeight: 600, letterSpacing: '0.05em', borderRadius: 8, fontSize: '0.72rem' },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
         root: {
-          borderRadius: 12,
-          padding: '10px 24px',
           fontWeight: 600,
-          fontFamily: '"Outfit", sans-serif',
-          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        },
-        containedPrimary: {
-          background: 'linear-gradient(135deg, #2F6690 0%, #1E4D6E 100%)',
-          boxShadow: '0 4px 20px rgba(47,102,144,0.25)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #3A7DB0 0%, #2F6690 100%)',
-            boxShadow: '0 6px 28px rgba(47,102,144,0.4)',
-            transform: 'translateY(-1px)',
-          },
-        },
-        containedWarning: {
-          background: 'linear-gradient(135deg, #FFA630 0%, #E89620 100%)',
-          color: '#060D1A',
-          boxShadow: '0 4px 20px rgba(255,166,48,0.3)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #FFB850 0%, #FFA630 100%)',
-            boxShadow: '0 6px 28px rgba(255,166,48,0.5)',
-            transform: 'translateY(-1px)',
-          },
-        },
-        outlined: {
-          borderColor: 'rgba(47,102,144,0.3)',
-          color: '#8892B0',
-          '&:hover': {
-            borderColor: 'rgba(255,166,48,0.5)',
-            color: '#FFA630',
-            background: 'rgba(255,166,48,0.06)',
-          },
+          letterSpacing: '0.03em',
+          borderRadius: 8,
+          fontSize: '0.7rem',
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          background: 'linear-gradient(160deg, #0F1E37, #142847)',
-          border: '1px solid rgba(47,102,144,0.18)',
-          borderRadius: 24,
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(47,102,144,0.1)',
+          background: 'linear-gradient(145deg, #0F172A, #1E293B)',
+          border: '1px solid rgba(59,130,246,0.12)',
+          borderRadius: 20,
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 120px rgba(59,130,246,0.06)',
           backgroundImage: 'none',
         },
       },
@@ -177,33 +172,37 @@ const lumaTheme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          background: 'rgba(20,40,70,0.95)',
+          background: alpha('#1E293B', 0.95),
           backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(47,102,144,0.25)',
-          borderRadius: 10,
-          fontSize: '0.75rem',
-          padding: '10px 14px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(59,130,246,0.15)',
+          borderRadius: 8,
+          fontSize: '0.7rem',
+          padding: '8px 14px',
         },
       },
     },
     MuiSkeleton: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(90deg, rgba(47,102,144,0.06) 25%, rgba(47,102,144,0.12) 37%, rgba(47,102,144,0.06) 63%)',
+          background: 'linear-gradient(90deg, rgba(59,130,246,0.04) 25%, rgba(59,130,246,0.08) 37%, rgba(59,130,246,0.04) 63%)',
           backgroundSize: '200% 100%',
-          animation: 'shimmer 1.8s ease-in-out infinite',
-          borderRadius: 10,
+          animation: 'shimmer 2s ease-in-out infinite',
+          borderRadius: 8,
         },
       },
     },
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 10,
           margin: '2px 8px',
-          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         },
+      },
+    },
+    MuiBreadcrumbs: {
+      styleOverrides: {
+        separator: { color: '#475569', mx: 1 },
+        li: { fontSize: '0.8rem' },
       },
     },
   },
@@ -213,11 +212,7 @@ function AppInner() {
   const [authReady, setAuthReady] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState('connecting')
   const [selectedFloorId, setSelectedFloorId] = useState(null)
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
-
-  const handleMouseMove = useCallback((e) => {
-    setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
-  }, [])
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     signInAnonymously(auth)
@@ -234,7 +229,14 @@ function AppInner() {
     return unsub
   }, [])
 
-  if (!authReady) {
+  useEffect(() => {
+    if (authReady) {
+      const t = setTimeout(() => setReady(true), 300)
+      return () => clearTimeout(t)
+    }
+  }, [authReady])
+
+  if (!ready) {
     return (
       <Box
         sx={{
@@ -242,9 +244,9 @@ function AppInner() {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          background: '#060D1A',
+          background: '#0B1121',
           flexDirection: 'column',
-          gap: 5,
+          gap: 6,
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -253,35 +255,29 @@ function AppInner() {
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'radial-gradient(circle at 30% 40%, rgba(47,102,144,0.06) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(255,166,48,0.04) 0%, transparent 60%)',
+            background: `
+              radial-gradient(ellipse 600px 500px at 50% 40%, rgba(59,130,246,0.06), transparent 60%),
+              radial-gradient(ellipse 400px 300px at 50% 60%, rgba(245,158,11,0.04), transparent 60%)
+            `,
           }}
         />
-        <Box sx={{ position: 'relative', width: 140, height: 140 }}>
+        <Box sx={{ position: 'relative', width: 100, height: 100 }}>
           <Box
             sx={{
               position: 'absolute',
-              inset: -20,
+              inset: -16,
               borderRadius: '50%',
-              border: '2px solid rgba(47,102,144,0.12)',
-              animation: 'rotate-slow 8s linear infinite',
+              border: '2px solid rgba(59,130,246,0.08)',
+              animation: 'rotate-slow 10s linear infinite',
             }}
           />
           <Box
             sx={{
               position: 'absolute',
-              inset: -35,
+              inset: -28,
               borderRadius: '50%',
-              border: '1px solid rgba(255,166,48,0.08)',
-              animation: 'rotate-slow 12s linear infinite reverse',
-            }}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: -50,
-              borderRadius: '50%',
-              border: '1px dashed rgba(47,102,144,0.06)',
-              animation: 'rotate-slow 20s linear infinite',
+              border: '1px solid rgba(245,158,11,0.05)',
+              animation: 'rotate-slow 15s linear infinite reverse',
             }}
           />
           <Box
@@ -295,40 +291,23 @@ function AppInner() {
               position: 'relative',
               zIndex: 1,
               animation: 'floating 3s ease-in-out infinite',
-              filter: 'drop-shadow(0 0 30px rgba(47,102,144,0.3))',
+              filter: 'drop-shadow(0 0 30px rgba(59,130,246,0.3))',
             }}
           />
-        </Box>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography
-            sx={{
-              fontFamily: '"Outfit", sans-serif',
-              fontSize: '1.1rem',
-              fontWeight: 300,
-              letterSpacing: '0.2em',
-              background: 'linear-gradient(90deg, #8892B0, #5B7FA5, #8892B0)',
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              animation: 'text-shimmer 3s linear infinite',
-            }}
-          >
-            HARDWARE SIMULATOR
-          </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
-              width: 6,
-              height: 6,
+              width: 5,
+              height: 5,
               borderRadius: '50%',
-              bgcolor: '#FFA630',
-              animation: 'status-pulse 1.5s ease-in-out infinite',
-              boxShadow: '0 0 12px rgba(255,166,48,0.6)',
+              bgcolor: '#3B82F6',
+              animation: 'status-pulse 2s ease-in-out infinite',
+              boxShadow: '0 0 8px rgba(59,130,246,0.6)',
             }}
           />
-          <Typography variant="caption" sx={{ letterSpacing: '0.08em' }}>
-            Initializing
+          <Typography variant="caption" sx={{ letterSpacing: '0.1em', fontSize: '0.68rem', color: '#64748B' }}>
+            Connecting to Luma
           </Typography>
         </Box>
       </Box>
@@ -337,28 +316,7 @@ function AppInner() {
 
   return (
     <BrowserRouter>
-      <Box
-        sx={{
-          display: 'flex',
-          minHeight: '100vh',
-          position: 'relative',
-          background: '#060D1A',
-        }}
-        onMouseMove={handleMouseMove}
-      >
-        <Box
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 0,
-            background: `
-              radial-gradient(ellipse 900px 700px at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(47,102,144,0.06) 0%, transparent 60%),
-              radial-gradient(ellipse 700px 500px at ${(1 - mousePos.x) * 100}% ${(1 - mousePos.y) * 100}%, rgba(255,166,48,0.04) 0%, transparent 60%)
-            `,
-            transition: 'background 0.6s ease-out',
-          }}
-        />
+      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#0B1121' }}>
         <Box
           sx={{
             position: 'fixed',
@@ -370,77 +328,40 @@ function AppInner() {
           <Box
             sx={{
               position: 'absolute',
-              top: '10%',
-              left: '5%',
-              width: 500,
-              height: 500,
+              top: '-15%',
+              right: '-10%',
+              width: 800,
+              height: 800,
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(47,102,144,0.08) 0%, transparent 70%)',
-              filter: 'blur(60px)',
-              animation: 'float-orb-1 20s ease-in-out infinite',
+              background: 'radial-gradient(circle, rgba(59,130,246,0.06), transparent 60%)',
+              filter: 'blur(90px)',
+              animation: 'float-orb-1 25s ease-in-out infinite',
             }}
           />
           <Box
             sx={{
               position: 'absolute',
-              top: '50%',
-              right: '-5%',
-              width: 400,
-              height: 400,
+              bottom: '-15%',
+              left: '-10%',
+              width: 700,
+              height: 700,
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255,166,48,0.05) 0%, transparent 70%)',
-              filter: 'blur(60px)',
-              animation: 'float-orb-2 25s ease-in-out infinite',
-            }}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '10%',
-              left: '40%',
-              width: 350,
-              height: 350,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(46,139,87,0.05) 0%, transparent 70%)',
-              filter: 'blur(50px)',
-              animation: 'float-orb-3 22s ease-in-out infinite',
+              background: 'radial-gradient(circle, rgba(245,158,11,0.04), transparent 60%)',
+              filter: 'blur(90px)',
+              animation: 'float-orb-2 30s ease-in-out infinite',
             }}
           />
         </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 0,
-            opacity: 0.03,
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
-            backgroundRepeat: 'repeat',
-            backgroundSize: '256px 256px',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 0,
-            opacity: 0.03,
-            background: `
-              radial-gradient(circle at 50% 50%, rgba(47,102,144,0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px',
-          }}
-        />
+
         <Navbar connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} />
         <Sidebar selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            mt: 8,
-            ml: '250px',
-            p: 3,
+            mt: 9,
+            ml: '252px',
+            p: 4,
             position: 'relative',
             zIndex: 1,
           }}
@@ -448,15 +369,15 @@ function AppInner() {
           <Routes>
             <Route
               path="/"
-              element={<PlaceholderPage title="Device Dashboard" subtitle="Select a floor from the sidebar to view its devices" />}
+              element={<PlaceholderPage title="Device Dashboard" subtitle="Select a floor from the sidebar to monitor and control devices" />}
             />
             <Route
               path="/device/:deviceId"
-              element={<PlaceholderPage title="Device Details" subtitle="Interactive device controls coming in Phase 2" />}
+              element={<PlaceholderPage title="Device Details" subtitle="Interactive device controls, schedules, and snapshots coming soon" />}
             />
             <Route
               path="/camera/:deviceId"
-              element={<PlaceholderPage title="Camera Feed" subtitle="Live camera view coming in Phase 2" />}
+              element={<PlaceholderPage title="Camera Feed" subtitle="Live camera view with snapshot controls coming soon" />}
             />
           </Routes>
         </Box>
@@ -467,54 +388,60 @@ function AppInner() {
 
 function PlaceholderPage({ title, subtitle }) {
   return (
-    <Box sx={{ animation: 'slide-up-stagger 0.6s ease-out' }}>
-      <Typography
-        variant="h4"
-        sx={{
-          background: 'linear-gradient(135deg, #E4ECF2, #8892B0)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          mb: 0.5,
-        }}
-      >
+    <Box sx={{ animation: 'slide-up-stagger 0.7s ease-out' }}>
+      <Typography variant="h3" sx={{ color: '#F1F5F9', fontWeight: 600, letterSpacing: '-0.02em', mb: 0.5 }}>
         {title}
       </Typography>
-      <Typography variant="body2" sx={{ mb: 4 }}>
+      <Typography variant="body2" sx={{ mb: 5, color: '#64748B', fontSize: '0.9rem' }}>
         {subtitle}
       </Typography>
+
       <Box
         sx={{
-          p: 6,
-          borderRadius: 4,
-          border: '1px solid rgba(47,102,144,0.12)',
+          p: 8,
+          borderRadius: 3,
+          border: '1px solid rgba(59,130,246,0.08)',
           textAlign: 'center',
-          background: 'linear-gradient(160deg, rgba(15,30,55,0.6), rgba(20,40,70,0.3))',
+          background: `
+            linear-gradient(145deg, rgba(15,23,42,0.7), rgba(30,41,59,0.4)),
+            radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.05), transparent 50%)
+          `,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          animation: 'border-glow 4s ease-in-out infinite',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 200,
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent)',
+          },
         }}
       >
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: '50%',
-              border: '2px solid rgba(47,102,144,0.15)',
-              animation: 'rotate-slow 6s linear infinite',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#FFA630' }} />
-          </Box>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
+          {[0, 1, 2].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                bgcolor: i === 0 ? '#3B82F6' : i === 1 ? '#F59E0B' : '#10B981',
+                animation: `status-pulse ${2 + i * 0.5}s ease-in-out infinite`,
+                animationDelay: `${i * 0.3}s`,
+              }}
+            />
+          ))}
         </Box>
-        <Typography variant="h6" sx={{ color: '#8892B0', fontWeight: 400, mb: 1 }}>
-          Phase 2 — Coming Next
+        <Typography variant="h6" sx={{ color: '#94A3B8', fontWeight: 500, mb: 1, letterSpacing: '0.02em' }}>
+          Phase 2 — In Development
         </Typography>
-        <Typography variant="body2">
-          Device cards, interactive controls, real-time status chips, and camera feeds will be implemented in the next phase.
+        <Typography variant="body2" sx={{ color: '#64748B', maxWidth: 400, mx: 'auto' }}>
+          Device cards, live status chips, toggle controls, and real-time camera feeds are being built now.
         </Typography>
       </Box>
     </Box>
