@@ -16,10 +16,14 @@ export default function AddRoomDialog({ open, onClose, onSave }) {
   const handleSave = async () => {
     if (!name.trim()) return
     setSaving(true)
-    await onSave(name.trim())
+    try {
+      await onSave(name.trim())
+      setName('')
+      onClose()
+    } catch (err) {
+      alert('Error: ' + (err.message || 'Save failed'))
+    }
     setSaving(false)
-    setName('')
-    onClose()
   }
 
   return (

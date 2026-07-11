@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getDatabase, ref, onValue, off, get, set, update, connectDatabaseEmulator } from 'firebase/database'
-import { getAuth, signInAnonymously, onAuthStateChanged, connectAuthEmulator } from 'firebase/auth'
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-api-key',
@@ -23,7 +23,6 @@ try {
 
   if (useEmulator) {
     connectDatabaseEmulator(db, 'localhost', 9000)
-    connectAuthEmulator(auth, 'http://localhost:9099')
     console.log('Connected to Firebase Emulator')
   }
 } catch (err) {

@@ -42,6 +42,14 @@ export default function FloorOverviewPage({ selectedFloorId }) {
     setDevicesLoading(true)
     setDevices([])
 
+    const unsubs = []
+
+    const floorRef = ref(db, `floors/${selectedFloorId}`)
+    const stopFloor = onValue(floorRef, (snap) => {
+      if (snap.exists()) setFloorData(snap.val())
+    })
+    unsubs.push(stopFloor)
+
     const devicesRef = ref(db, 'devices')
     const stopDevices = onValue(devicesRef, async (snapshot) => {
       try {
@@ -80,8 +88,9 @@ export default function FloorOverviewPage({ selectedFloorId }) {
       }
       setDevicesLoading(false)
     })
+    unsubs.push(stopDevices)
 
-    return () => stopDevices()
+    return () => unsubs.forEach((u) => u())
   }, [selectedFloorId])
 
   const handleToggle = async (deviceId, state) => {
@@ -98,11 +107,19 @@ export default function FloorOverviewPage({ selectedFloorId }) {
   }
 
   const handleAddRoom = async (name) => {
-    await addRoom(selectedFloorId, name)
+    try {
+      await addRoom(selectedFloorId, name)
+    } catch (err) {
+      alert('Failed to add room: ' + (err.message || err.code))
+    }
   }
 
   const handleAddDevice = async (roomId, deviceData) => {
-    await addDevice(selectedFloorId, roomId, deviceData)
+    try {
+      await addDevice(selectedFloorId, roomId, deviceData)
+    } catch (err) {
+      alert('Failed to add device: ' + (err.message || err.code))
+    }
   }
 
   const handleDeleteRoom = async () => {
