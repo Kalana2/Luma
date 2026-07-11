@@ -203,3 +203,110 @@ export async function seedSampleData() {
   await update(ref(db), { floors: seedFloors, devices: seedDevices })
   return { floors: seedFloors, devices: seedDevices }
 }
+
+function generateId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+export async function addFloor(name, icon) {
+  ensureDb()
+  const id = generateId('floor')
+  await set(ref(db, `floors/${id}`), {
+    name,
+    icon: icon || 'home',
+    rooms: {},
+  })
+  return id
+}
+
+export async function updateFloor(floorId, data) {
+  ensureDb()
+  const updates = {}
+  if (data.name) updates[`floors/${floorId}/name`] = data.name
+  if (data.icon) updates[`floors/${floorId}/icon`] = data.icon
+  if (Object.keys(updates).length > 0) {
+    await update(ref(db), updates)
+  }
+}
+
+export async function deleteFloor(floorId) {
+  ensureDb()
+  const floorSnap = await get(ref(db, `floors/${floorId}`))
+  if (!floorSnap.exists()) return
+
+  const floor = floorSnap.val()
+  const deviceIds = []
+
+  if (floor.rooms) {
+    for (const roomId of Object.keys(floor.rooms)) {
+      const room = floor.rooms[roomId]
+      if (room.devices) {
+        for (const did of Object.keys(room.devices)) {
+          deviceIds.push(did)
+        }
+      }
+    }
+  }
+
+  const updates = {}
+  updates[`floors/${floorId}`] = null
+  for (const did of deviceIds) {
+    updates[`devices/${did}`] = null
+  }
+
+  await update(ref(db), updates)
+}
+
+export async function addRoom(floorId, name) {
+  ensureDb()
+  const id = generateId('room')
+  await set(ref(db, `floors/${floorId}/rooms/${id}`), {
+    name,
+    devices: {},
+  })
+  return id
+}
+
+export async function deleteRoom(floorId, roomId) {
+  ensureDb()
+  const roomSnap = await get(ref(db, `floors/${floorId}/rooms/${roomId}`))
+  if (!roomSnap.exists()) return
+
+  const room = roomSnap.val()
+  const deviceIds = []
+  if (room.devices) {
+    for (const did of Object.keys(room.devices)) {
+      deviceIds.push(did)
+    }
+  }
+
+  const updates = {}
+  updates[`floors/${floorId}/rooms/${roomId}`] = null
+  for (const did of deviceIds) {
+    updates[`devices/${did}`] = null
+  }
+
+  await update(ref(db), updates)
+}
+
+export async function addDevice(floorId, roomId, deviceData) {
+  ensureDb()
+  const id = generateId('device')
+  const device = {
+    ...deviceData,
+    lastSeen: Date.now(),
+  }
+  await set(ref(db, `devices/${id}`), device)
+  await set(ref(db, `floors/${floorId}/rooms/${roomId}/devices/${id}`), true)
+  return id
+}
+
+export async function deleteDevice(deviceId, floorId, roomId) {
+  ensureDb()
+  const updates = {}
+  updates[`devices/${deviceId}`] = null
+  if (floorId && roomId) {
+    updates[`floors/${floorId}/rooms/${roomId}/devices/${deviceId}`] = null
+  }
+  await update(ref(db), updates)
+}

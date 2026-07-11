@@ -37,11 +37,13 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
   const handleSeedData = async () => {
     setSeedStatus('loading')
     try {
-      await seedSampleData()
+      const result = await seedSampleData()
+      console.log('Seed success:', result)
       setSeedStatus('success')
       setTimeout(() => setSeedStatus('idle'), 2500)
     } catch (err) {
-      console.error('Seed failed:', err)
+      console.error('Seed failed:', err.message, err.code)
+      alert('Seed failed: ' + (err.message || err.code || 'Unknown error') + '\n\nCheck browser console (F12) for details.')
       setSeedStatus('error')
       setTimeout(() => setSeedStatus('idle'), 3000)
     }
