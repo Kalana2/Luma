@@ -1,0 +1,52 @@
+# ===== Android =====
+*.iml
+.gradle/
+build/
+local.properties
+.idea/
+*.apk
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+.navigation/
+
+# Android Studio
+*.log
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Google Services
+android/app/google-services.json
+
+# ===== Node / React =====
+node_modules/
+dist/
+.env
+.env.local
+.eslintcache
+*.log
+npm-debug.log*
+
+# ===== Firebase =====
+firebase-debug.log
+.firebase/
+*.log
+
+# ===== OS / Editor =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# ===== Misc =====
+*.tmp
+*.bak
+*.orig
