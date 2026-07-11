@@ -14,14 +14,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(onBackClick: () -> Unit) {
+fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Sign In") },
@@ -55,7 +61,8 @@ fun SignInScreen(onBackClick: () -> Unit) {
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -67,19 +74,39 @@ fun SignInScreen(onBackClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { /* TODO */ },
+                onClick = {
+                    if (email.isEmpty() || password.isEmpty()) {
+                        scope.launch { snackbarHostState.showSnackbar("Please fill all fields") }
+                        return@Button
+                    }
+                    isLoading = true
+                    com.example.myapplication.ui.pages_controllers.login(email, password) { success, message ->
+                        isLoading = false
+                        if (success) {
+                            onSignInSuccess()
+                        } else {
+                            scope.launch { snackbarHostState.showSnackbar(message ?: "Login Failed") }
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                enabled = !isLoading
             ) {
-                Text("Login", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                if (isLoading) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Login", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
