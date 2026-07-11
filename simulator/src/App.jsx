@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import {
   ThemeProvider,
   createTheme,
   Box,
-  CircularProgress,
   Typography,
 } from '@mui/material'
 import { auth, signInAnonymously, onAuthStateChanged } from './firebase/firebaseConfig'
@@ -19,27 +18,29 @@ const lumaTheme = createTheme({
     warning: { main: '#FFA630' },
     success: { main: '#2E8B57' },
     error: { main: '#C0392B' },
-    background: { default: '#0A1628', paper: '#112240' },
-    text: { primary: '#E8F1F5', secondary: '#8892B0' },
-    divider: 'rgba(47,102,144,0.15)',
+    background: { default: '#060D1A', paper: 'rgba(15,30,55,0.85)' },
+    text: { primary: '#E4ECF2', secondary: '#8892B0' },
+    divider: 'rgba(47,102,144,0.12)',
   },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    h4: { fontWeight: 700, letterSpacing: '-0.02em' },
-    h5: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h6: { fontWeight: 600, fontSize: '1.05rem' },
-    body1: { color: '#CCD6E0' },
+    h1: { fontFamily: '"Outfit", sans-serif', fontWeight: 800, letterSpacing: '-0.03em' },
+    h2: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.03em' },
+    h3: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
+    h4: { fontFamily: '"Outfit", sans-serif', fontWeight: 700, letterSpacing: '-0.02em' },
+    h5: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '-0.01em' },
+    h6: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, fontSize: '1.05rem' },
+    body1: { color: '#CCD6E0', fontSize: '0.95rem' },
     body2: { color: '#8892B0', fontSize: '0.85rem' },
-    caption: { color: '#8892B0', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 500 },
-    button: { fontWeight: 600, letterSpacing: '0.03em', textTransform: 'none' },
+    caption: { color: '#8892B0', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 500, fontSize: '0.7rem' },
+    button: { fontFamily: '"Outfit", sans-serif', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'none' },
   },
-  shape: { borderRadius: 12 },
+  shape: { borderRadius: 16 },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: 'linear-gradient(135deg, #0A1628 0%, #112240 50%, #0D1F3C 100%)',
-          backgroundAttachment: 'fixed',
+          background: '#060D1A',
           minHeight: '100vh',
         },
       },
@@ -47,15 +48,15 @@ const lumaTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(145deg, rgba(17,34,64,0.9) 0%, rgba(26,51,86,0.6) 100%)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(47,102,144,0.15)',
-          borderRadius: 16,
-          transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+          background: 'linear-gradient(145deg, rgba(15,30,55,0.9) 0%, rgba(20,40,70,0.5) 100%)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(47,102,144,0.12)',
+          borderRadius: 20,
+          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           '&:hover': {
-            transform: 'translateY(-4px)',
             borderColor: 'rgba(255,166,48,0.3)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,166,48,0.1)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,166,48,0.08), 0 0 40px rgba(47,102,144,0.1)',
           },
         },
       },
@@ -63,9 +64,10 @@ const lumaTheme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'rgba(10,22,40,0.75)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(47,102,144,0.2)',
+          background: 'rgba(6,13,26,0.8)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderBottom: '1px solid rgba(47,102,144,0.12)',
           boxShadow: 'none',
         },
       },
@@ -73,71 +75,101 @@ const lumaTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: 'rgba(10,22,40,0.85)',
-          backdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(47,102,144,0.15)',
+          background: 'rgba(6,13,26,0.9)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderRight: '1px solid rgba(47,102,144,0.1)',
+          boxShadow: '4px 0 40px rgba(0,0,0,0.3)',
         },
       },
     },
     MuiSwitch: {
       styleOverrides: {
         root: {
-          width: 52,
-          height: 28,
+          width: 56,
+          height: 30,
           padding: 0,
           '& .MuiSwitch-switchBase': {
             padding: 1,
             '&.Mui-checked': {
-              transform: 'translateX(24px)',
+              transform: 'translateX(26px)',
               '& .MuiSwitch-thumb': {
                 background: 'linear-gradient(135deg, #FFA630, #FF8C00)',
-                boxShadow: '0 0 12px rgba(255,166,48,0.6)',
+                boxShadow: '0 0 16px rgba(255,166,48,0.7), 0 2px 8px rgba(0,0,0,0.3)',
               },
               '& + .MuiSwitch-track': {
                 opacity: 1,
-                background: 'rgba(255,166,48,0.25)',
+                background: 'linear-gradient(90deg, rgba(255,166,48,0.3), rgba(255,166,48,0.15))',
+                border: '1px solid rgba(255,166,48,0.2)',
               },
             },
           },
           '& .MuiSwitch-thumb': {
-            width: 26,
-            height: 26,
-            background: '#546E7A',
-            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+            width: 28,
+            height: 28,
+            background: 'linear-gradient(135deg, #546E7A, #37474F)',
+            transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           },
           '& .MuiSwitch-track': {
-            borderRadius: 14,
+            borderRadius: 15,
             opacity: 1,
-            background: 'rgba(84,110,122,0.35)',
+            background: 'rgba(84,110,122,0.18)',
+            border: '1px solid rgba(84,110,122,0.15)',
           },
         },
       },
     },
     MuiChip: {
       styleOverrides: {
-        root: { fontWeight: 600, letterSpacing: '0.04em', borderRadius: 8, fontSize: '0.75rem' },
+        root: { fontWeight: 600, letterSpacing: '0.05em', borderRadius: 8, fontSize: '0.72rem' },
       },
     },
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 10, padding: '8px 20px', fontWeight: 600 },
+        root: {
+          borderRadius: 12,
+          padding: '10px 24px',
+          fontWeight: 600,
+          fontFamily: '"Outfit", sans-serif',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #2F6690, #1E4D6E)',
-          '&:hover': { background: 'linear-gradient(135deg, #3A7DB0, #2F6690)' },
+          background: 'linear-gradient(135deg, #2F6690 0%, #1E4D6E 100%)',
+          boxShadow: '0 4px 20px rgba(47,102,144,0.25)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #3A7DB0 0%, #2F6690 100%)',
+            boxShadow: '0 6px 28px rgba(47,102,144,0.4)',
+            transform: 'translateY(-1px)',
+          },
         },
         containedWarning: {
-          background: 'linear-gradient(135deg, #FFA630, #E89620)',
-          color: '#0A1628',
-          '&:hover': { background: 'linear-gradient(135deg, #FFB850, #FFA630)' },
+          background: 'linear-gradient(135deg, #FFA630 0%, #E89620 100%)',
+          color: '#060D1A',
+          boxShadow: '0 4px 20px rgba(255,166,48,0.3)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #FFB850 0%, #FFA630 100%)',
+            boxShadow: '0 6px 28px rgba(255,166,48,0.5)',
+            transform: 'translateY(-1px)',
+          },
+        },
+        outlined: {
+          borderColor: 'rgba(47,102,144,0.3)',
+          color: '#8892B0',
+          '&:hover': {
+            borderColor: 'rgba(255,166,48,0.5)',
+            color: '#FFA630',
+            background: 'rgba(255,166,48,0.06)',
+          },
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          background: 'linear-gradient(145deg, #112240, #1A3356)',
-          border: '1px solid rgba(47,102,144,0.2)',
-          borderRadius: 20,
+          background: 'linear-gradient(160deg, #0F1E37, #142847)',
+          border: '1px solid rgba(47,102,144,0.18)',
+          borderRadius: 24,
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(47,102,144,0.1)',
           backgroundImage: 'none',
         },
       },
@@ -145,32 +177,47 @@ const lumaTheme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          background: '#1A3356',
-          border: '1px solid rgba(47,102,144,0.3)',
-          borderRadius: 8,
+          background: 'rgba(20,40,70,0.95)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(47,102,144,0.25)',
+          borderRadius: 10,
           fontSize: '0.75rem',
-          padding: '8px 12px',
+          padding: '10px 14px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         },
       },
     },
     MuiSkeleton: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(90deg, rgba(47,102,144,0.08) 25%, rgba(47,102,144,0.15) 37%, rgba(47,102,144,0.08) 63%)',
+          background: 'linear-gradient(90deg, rgba(47,102,144,0.06) 25%, rgba(47,102,144,0.12) 37%, rgba(47,102,144,0.06) 63%)',
           backgroundSize: '200% 100%',
-          animation: 'shimmer 1.5s ease-in-out infinite',
-          borderRadius: 8,
+          animation: 'shimmer 1.8s ease-in-out infinite',
+          borderRadius: 10,
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          margin: '2px 8px',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         },
       },
     },
   },
 })
 
-function App() {
+function AppInner() {
   const [authReady, setAuthReady] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState('connecting')
   const [selectedFloorId, setSelectedFloorId] = useState(null)
-  const [city] = useState('')
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
+
+  const handleMouseMove = useCallback((e) => {
+    setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
+  }, [])
 
   useEffect(() => {
     signInAnonymously(auth)
@@ -195,51 +242,94 @@ function App() {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          background: 'linear-gradient(135deg, #0A1628 0%, #112240 50%, #0D1F3C 100%)',
+          background: '#060D1A',
           flexDirection: 'column',
-          gap: 4,
+          gap: 5,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Box sx={{ position: 'relative', width: 120, height: 120 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 30% 40%, rgba(47,102,144,0.06) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(255,166,48,0.04) 0%, transparent 60%)',
+          }}
+        />
+        <Box sx={{ position: 'relative', width: 140, height: 140 }}>
           <Box
             sx={{
               position: 'absolute',
-              inset: -8,
+              inset: -20,
               borderRadius: '50%',
-              border: '2px solid rgba(47,102,144,0.2)',
-              animation: 'status-pulse 2s ease-in-out infinite',
+              border: '2px solid rgba(47,102,144,0.12)',
+              animation: 'rotate-slow 8s linear infinite',
             }}
           />
           <Box
             sx={{
               position: 'absolute',
-              inset: -16,
+              inset: -35,
               borderRadius: '50%',
-              border: '1px solid rgba(255,166,48,0.1)',
-              animation: 'status-pulse 3s ease-in-out infinite 0.5s',
+              border: '1px solid rgba(255,166,48,0.08)',
+              animation: 'rotate-slow 12s linear infinite reverse',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: -50,
+              borderRadius: '50%',
+              border: '1px dashed rgba(47,102,144,0.06)',
+              animation: 'rotate-slow 20s linear infinite',
             }}
           />
           <Box
             component="img"
             src="/logo.png"
             alt="Luma"
-            sx={{ width: '100%', height: '100%', objectFit: 'contain', position: 'relative', zIndex: 1 }}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              position: 'relative',
+              zIndex: 1,
+              animation: 'floating 3s ease-in-out infinite',
+              filter: 'drop-shadow(0 0 30px rgba(47,102,144,0.3))',
+            }}
           />
         </Box>
-        <Typography variant="h6" sx={{ color: '#8892B0', fontWeight: 300, letterSpacing: '0.15em' }}>
-          SMART HOME SIMULATOR
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography
+            sx={{
+              fontFamily: '"Outfit", sans-serif',
+              fontSize: '1.1rem',
+              fontWeight: 300,
+              letterSpacing: '0.2em',
+              background: 'linear-gradient(90deg, #8892B0, #5B7FA5, #8892B0)',
+              backgroundSize: '200% auto',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              animation: 'text-shimmer 3s linear infinite',
+            }}
+          >
+            HARDWARE SIMULATOR
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
-              width: 8,
-              height: 8,
+              width: 6,
+              height: 6,
               borderRadius: '50%',
               bgcolor: '#FFA630',
               animation: 'status-pulse 1.5s ease-in-out infinite',
+              boxShadow: '0 0 12px rgba(255,166,48,0.6)',
             }}
           />
-          <Typography variant="caption">Connecting to Firebase</Typography>
+          <Typography variant="caption" sx={{ letterSpacing: '0.08em' }}>
+            Initializing
+          </Typography>
         </Box>
       </Box>
     )
@@ -247,28 +337,126 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Navbar connectionStatus={connectionStatus} />
+      <Box
+        sx={{
+          display: 'flex',
+          minHeight: '100vh',
+          position: 'relative',
+          background: '#060D1A',
+        }}
+        onMouseMove={handleMouseMove}
+      >
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 0,
+            background: `
+              radial-gradient(ellipse 900px 700px at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(47,102,144,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 700px 500px at ${(1 - mousePos.x) * 100}% ${(1 - mousePos.y) * 100}%, rgba(255,166,48,0.04) 0%, transparent 60%)
+            `,
+            transition: 'background 0.6s ease-out',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '10%',
+              left: '5%',
+              width: 500,
+              height: 500,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(47,102,144,0.08) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+              animation: 'float-orb-1 20s ease-in-out infinite',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              right: '-5%',
+              width: 400,
+              height: 400,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,166,48,0.05) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+              animation: 'float-orb-2 25s ease-in-out infinite',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '10%',
+              left: '40%',
+              width: 350,
+              height: 350,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(46,139,87,0.05) 0%, transparent 70%)',
+              filter: 'blur(50px)',
+              animation: 'float-orb-3 22s ease-in-out infinite',
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 0,
+            opacity: 0.03,
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '256px 256px',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 0,
+            opacity: 0.03,
+            background: `
+              radial-gradient(circle at 50% 50%, rgba(47,102,144,0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
+        <Navbar connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} />
         <Sidebar selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
-        <Box component="main" sx={{ flexGrow: 1, mt: 8, ml: '240px', p: 3 }}>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            mt: 8,
+            ml: '250px',
+            p: 3,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           <Routes>
             <Route
               path="/"
-              element={
-                <PlaceholderPage
-                  title="Device Dashboard"
-                  subtitle="Select a floor to view devices"
-                  city={city}
-                />
-              }
+              element={<PlaceholderPage title="Device Dashboard" subtitle="Select a floor from the sidebar to view its devices" />}
             />
             <Route
               path="/device/:deviceId"
-              element={<PlaceholderPage title="Device Details" subtitle="Device controls coming soon" city={city} />}
+              element={<PlaceholderPage title="Device Details" subtitle="Interactive device controls coming in Phase 2" />}
             />
             <Route
               path="/camera/:deviceId"
-              element={<PlaceholderPage title="Camera Feed" subtitle="Camera view coming soon" city={city} />}
+              element={<PlaceholderPage title="Camera Feed" subtitle="Live camera view coming in Phase 2" />}
             />
           </Routes>
         </Box>
@@ -277,10 +465,18 @@ function App() {
   )
 }
 
-function PlaceholderPage({ title, subtitle, city }) {
+function PlaceholderPage({ title, subtitle }) {
   return (
-    <Box sx={{ animation: 'float-in 0.5s ease-out' }}>
-      <Typography variant="h4" sx={{ mb: 1 }}>
+    <Box sx={{ animation: 'slide-up-stagger 0.6s ease-out' }}>
+      <Typography
+        variant="h4"
+        sx={{
+          background: 'linear-gradient(135deg, #E4ECF2, #8892B0)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          mb: 0.5,
+        }}
+      >
         {title}
       </Typography>
       <Typography variant="body2" sx={{ mb: 4 }}>
@@ -288,25 +484,38 @@ function PlaceholderPage({ title, subtitle, city }) {
       </Typography>
       <Box
         sx={{
-          p: 4,
+          p: 6,
           borderRadius: 4,
-          border: '1px dashed rgba(47,102,144,0.25)',
+          border: '1px solid rgba(47,102,144,0.12)',
           textAlign: 'center',
-          background: 'linear-gradient(145deg, rgba(17,34,64,0.5), rgba(26,51,86,0.3))',
-          backdropFilter: 'blur(12px)',
+          background: 'linear-gradient(160deg, rgba(15,30,55,0.6), rgba(20,40,70,0.3))',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          animation: 'border-glow 4s ease-in-out infinite',
         }}
       >
-        <Typography variant="h6" sx={{ color: '#8892B0', mb: 2 }}>
-          Phase 2 coming next
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              border: '2px solid rgba(47,102,144,0.15)',
+              animation: 'rotate-slow 6s linear infinite',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#FFA630' }} />
+          </Box>
+        </Box>
+        <Typography variant="h6" sx={{ color: '#8892B0', fontWeight: 400, mb: 1 }}>
+          Phase 2 — Coming Next
         </Typography>
         <Typography variant="body2">
-          Floor overview, device cards, and controls will be implemented in the next phase.
+          Device cards, interactive controls, real-time status chips, and camera feeds will be implemented in the next phase.
         </Typography>
-        {city && (
-          <Typography variant="caption" sx={{ mt: 2, display: 'block' }}>
-            {city}
-          </Typography>
-        )}
       </Box>
     </Box>
   )
@@ -315,7 +524,7 @@ function PlaceholderPage({ title, subtitle, city }) {
 export default function ThemedApp() {
   return (
     <ThemeProvider theme={lumaTheme}>
-      <App />
+      <AppInner />
     </ThemeProvider>
   )
 }
