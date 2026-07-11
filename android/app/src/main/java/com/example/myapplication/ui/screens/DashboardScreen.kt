@@ -3,9 +3,12 @@ package com.example.myapplication.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -29,8 +33,13 @@ data class Floor(
     val name: String = "",
     val iconName: String = "Home",
     val roomCount: Int = 0,
-    val activeDevices: Int = 0
+    val activeDevices: Int = 0,
+    val isOn: Boolean = false
 )
+
+private val LumaPrimary = Color(0xFF7B88FF)
+private val LumaBackground = Color(0xFFF5F7FB)
+private val LumaCardBg = Color(0xFFFFFFFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +53,7 @@ fun DashboardScreen(
     var floors by remember { mutableStateOf<List<Floor>>(emptyList()) }
     var showAddFloorDialog by remember { mutableStateOf(false) }
     var floorToEdit by remember { mutableStateOf<Floor?>(null) }
+    var selectedCategory by remember { mutableStateOf(0) }
 
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
@@ -109,86 +119,130 @@ fun DashboardScreen(
             }
         }
     ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { 
-                        Text(
-                            "Lumaa", 
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleLarge 
-                        ) 
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background
+        Box(modifier = Modifier.fillMaxSize().background(LumaBackground)) {
+            Scaffold(
+                containerColor = Color.Transparent,
+                topBar = {
+                    TopAppBar(
+                        title = { },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.DarkGray)
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { /* TODO */ }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.DarkGray)
+                            }
+                            IconButton(onClick = { /* TODO */ }) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = "Profile",
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                     )
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showAddFloorDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Floor")
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.background
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 24.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                val greeting = getGreeting()
-                Text(
-                    text = "$greeting,",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "Your Floors",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(floors) { floor ->
-                        FloorCard(
-                            floor = floor,
-                            onClick = { onFloorClick(floor.id) },
-                            onLongClick = { floorToEdit = floor }
-                        )
+                },
+                bottomBar = {
+                    BottomAppBar(
+                        containerColor = Color.White,
+                        modifier = Modifier.height(70.dp).shadow(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { }) { Icon(Icons.Default.Home, contentDescription = null, tint = LumaPrimary) }
+                            IconButton(onClick = { }) { Icon(Icons.Default.DateRange, contentDescription = null, tint = Color.LightGray) }
+                            
+                            Spacer(modifier = Modifier.width(48.dp)) // Space for FAB
+                            
+                            IconButton(onClick = { }) { Icon(Icons.Default.Info, contentDescription = null, tint = Color.LightGray) }
+                            IconButton(onClick = { }) { Icon(Icons.Default.Settings, contentDescription = null, tint = Color.LightGray) }
+                        }
                     }
                 }
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = "Smart Home Controller",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    val categories = listOf("All Floors") + floors.map { it.name }
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        itemsIndexed(categories) { index, category ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = category,
+                                    color = if (selectedCategory == index) Color.Black else Color.Gray,
+                                    fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.clickable { selectedCategory = index }
+                                )
+                                if (selectedCategory == index) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Box(modifier = Modifier.width(20.dp).height(2.dp).background(LumaPrimary))
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
+                        items(floors) { floor ->
+                            FloorCard(
+                                floor = floor,
+                                onClick = { onFloorClick(floor.id) },
+                                onLongClick = { floorToEdit = floor },
+                                onToggle = { isOn ->
+                                    if (userId != null) {
+                                        database.child("users").child(userId).child("floors").child(floor.id)
+                                            .child("isOn").setValue(isOn)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Central FAB
+            FloatingActionButton(
+                onClick = { showAddFloorDialog = true },
+                containerColor = LumaPrimary,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 35.dp)
+                    .size(64.dp)
+                    .shadow(8.dp, CircleShape)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(32.dp))
             }
         }
     }
@@ -231,72 +285,76 @@ fun DashboardScreen(
 fun FloorCard(
     floor: Floor,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    onToggle: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
-        onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFEBEBF5) // Light lavender/grey background matching screenshot
-        )
+            .height(160.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = LumaCardBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
                 Icon(
                     imageVector = getIconForName(floor.iconName),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp),
-                    tint = Color(0xFF5D6A9E) // Darker blue icon matching screenshot
+                    modifier = Modifier.size(32.dp),
+                    tint = if (floor.isOn) LumaPrimary else Color.DarkGray
                 )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
+                Switch(
+                    checked = floor.isOn,
+                    onCheckedChange = onToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = LumaPrimary,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color.LightGray,
+                        uncheckedBorderColor = Color.Transparent
+                    ),
+                    modifier = Modifier.scale(0.8f)
+                )
+            }
+            
+            Column {
                 Text(
-                    text = floor.name, 
+                    text = floor.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color(0xFF333333)
+                    fontSize = 16.sp,
+                    color = Color.Black
                 )
-                
                 Text(
                     text = "${floor.roomCount} Rooms",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                
-                Text(
-                    text = "${floor.activeDevices} Devices ON",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
             
             IconButton(
                 onClick = onLongClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp)
+                modifier = Modifier.align(Alignment.End).size(24.dp)
             ) {
-                Icon(
-                    Icons.Default.MoreVert, 
-                    contentDescription = "Options",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(20.dp)
-                )
+                Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.LightGray)
             }
         }
     }
 }
+
+// Extension to scale switch
+@Composable
+fun Modifier.scale(scale: Float) = this.then(
+    androidx.compose.ui.draw.scale(scale)
+)
 
 @Composable
 fun FloorDialog(
