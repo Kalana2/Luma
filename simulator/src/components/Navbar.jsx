@@ -195,18 +195,34 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
               borderRadius: 2.5,
               bgcolor: statusBg,
               border: `1px solid ${alpha(statusColor, 0.15)}`,
+              transition: 'all 0.4s ease',
             }}
           >
-            <Box
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                bgcolor: statusColor,
-                boxShadow: connectionStatus === 'connected' ? `0 0 8px ${alpha(statusColor, 0.6)}` : 'none',
-                animation: connectionStatus === 'connected' ? 'status-pulse 2.5s ease-in-out infinite' : 'none',
-              }}
-            />
+            <Box sx={{ position: 'relative', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  bgcolor: statusColor,
+                  position: 'relative',
+                  zIndex: 2,
+                  boxShadow: connectionStatus === 'connected' ? `0 0 8px ${alpha(statusColor, 0.6)}` : 'none',
+                  animation: connectionStatus === 'connected' ? 'status-pulse 2.5s ease-in-out infinite' : 'none',
+                }}
+              />
+              {connectionStatus === 'connected' && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    inset: -5,
+                    borderRadius: '50%',
+                    border: `1px solid ${alpha(statusColor, 0.3)}`,
+                    animation: 'ring-expand 1.8s ease-out infinite',
+                  }}
+                />
+              )}
+            </Box>
             <Typography
               variant="caption"
               sx={{

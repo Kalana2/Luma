@@ -97,7 +97,7 @@ export default function DeviceDetailPage() {
   }
 
   return (
-    <Box sx={{ animation: 'slide-up-stagger 0.5s ease-out', maxWidth: 800 }}>
+    <Box className="page-enter-right" sx={{ maxWidth: 800 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <IconButton
           onClick={() => navigate('/')}

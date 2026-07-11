@@ -48,7 +48,7 @@ export default function CameraFeedPage() {
   }
 
   return (
-    <Box sx={{ animation: 'slide-up-stagger 0.5s ease-out', maxWidth: 900 }}>
+    <Box className="page-enter-right" sx={{ maxWidth: 900 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <IconButton
           onClick={() => navigate('/')}
@@ -94,6 +94,15 @@ export default function CameraFeedPage() {
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: 400,
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.03) 50%)',
+              backgroundSize: '100% 4px',
+              pointerEvents: 'none',
+              zIndex: 2,
+            },
           }}
         >
           <Box
@@ -104,7 +113,7 @@ export default function CameraFeedPage() {
               width: '100%',
               maxHeight: 600,
               objectFit: 'contain',
-              transition: 'opacity 0.3s ease',
+              transition: 'opacity 0.5s ease',
               opacity: refreshing ? 0.7 : 1,
             }}
           />
