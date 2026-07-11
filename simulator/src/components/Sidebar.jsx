@@ -9,24 +9,20 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Skeleton,
   alpha,
 } from '@mui/material'
 import { Home, Stairs, Roofing, ChevronLeft, Menu, Layers } from '@mui/icons-material'
+import useFloorList from '../hooks/useFloorList'
 
 const iconMap = { home: Home, stairs: Stairs, attic: Roofing }
-
-const floors = [
-  { id: 'floor-001', name: 'Ground Floor', icon: 'home', rooms: 2, devices: 2 },
-  { id: 'floor-002', name: 'First Floor', icon: 'stairs', rooms: 2, devices: 2 },
-  { id: 'floor-003', name: 'Second Floor', icon: 'attic', rooms: 1, devices: 1 },
-]
-
 const DRAWER_WIDTH = 252
 const COLLAPSED_WIDTH = 60
 
 export default function Sidebar({ selectedFloorId, onFloorSelect }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const { floors, loading } = useFloorList()
 
   useEffect(() => {
     requestAnimationFrame(() => setMounted(true))
@@ -88,27 +84,39 @@ export default function Sidebar({ selectedFloorId, onFloorSelect }) {
         </Tooltip>
       </Box>
 
-      <Box sx={{ position: 'relative', px: collapsed ? 0.8 : 1.5, pt: 1.5 }}>
-        {!collapsed && selectedIdx >= 0 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              left: 6,
-              width: 3,
-              height: 24,
-              borderRadius: 3,
-              background: 'linear-gradient(180deg, #3B82F6, #6366F1)',
-              top: selectedIdx * 50 + 22,
-              transition: 'top 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              boxShadow: '0 0 12px rgba(59,130,246,0.5)',
-            }}
-          />
-        )}
+        <Box sx={{ position: 'relative', px: collapsed ? 0.8 : 1.5, pt: 1.5 }}>
+          {!collapsed && selectedIdx >= 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                left: 6,
+                width: 3,
+                height: 24,
+                borderRadius: 3,
+                background: 'linear-gradient(180deg, #3B82F6, #6366F1)',
+                top: selectedIdx * 50 + 22,
+                transition: 'top 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: '0 0 12px rgba(59,130,246,0.5)',
+              }}
+            />
+          )}
 
-        <List sx={{ p: 0 }}>
-          {floors.map((floor, idx) => {
-            const Icon = iconMap[floor.icon] || Home
-            const isSelected = selectedFloorId === floor.id
+          {loading ? (
+            <Box sx={{ px: collapsed ? 0.5 : 1.5 }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={42}
+                  sx={{ mb: 0.5, borderRadius: 2.5 }}
+                />
+              ))}
+            </Box>
+          ) : (
+            <List sx={{ p: 0 }}>
+              {floors.map((floor, idx) => {
+                const Icon = iconMap[floor.icon] || Home
+                const isSelected = selectedFloorId === floor.id
 
             return (
               <Tooltip
@@ -200,43 +208,44 @@ export default function Sidebar({ selectedFloorId, onFloorSelect }) {
               </Tooltip>
             )
           })}
-        </List>
-      </Box>
+          </List>
+          )}
+        </Box>
 
-      {!collapsed && (
-        <Box sx={{ px: 2, pt: 3, pb: 2, mt: 'auto' }}>
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${alpha('#3B82F6', 0.06)}, ${alpha('#6366F1', 0.03)})`,
-              border: `1px solid ${alpha('#3B82F6', 0.08)}`,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Layers sx={{ fontSize: 14, color: '#475569' }} />
-              <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.62rem', letterSpacing: '0.1em', fontWeight: 600, textTransform: 'none' }}>
-                Simulator Status
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              {[
-                { label: 'Floors', value: 3 },
-                { label: 'Devices', value: 5 },
-              ].map((stat) => (
-                <Box key={stat.label}>
-                  <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontSize: '0.95rem', fontWeight: 700, color: '#F1F5F9', lineHeight: 1.1 }}>
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="caption" sx={{ fontSize: '0.58rem', color: '#64748B', textTransform: 'none', letterSpacing: 0 }}>
-                    {stat.label}
-                  </Typography>
-                </Box>
-              ))}
+        {!collapsed && (
+          <Box sx={{ px: 2, pt: 3, pb: 2, mt: 'auto' }}>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${alpha('#3B82F6', 0.06)}, ${alpha('#6366F1', 0.03)})`,
+                border: `1px solid ${alpha('#3B82F6', 0.08)}`,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Layers sx={{ fontSize: 14, color: '#475569' }} />
+                <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.62rem', letterSpacing: '0.1em', fontWeight: 600, textTransform: 'none' }}>
+                  Simulator Status
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {[
+                  { label: 'Floors', value: floors.length },
+                  { label: 'Devices', value: floors.reduce((sum, f) => sum + (f.devices || 0), 0) },
+                ].map((stat) => (
+                  <Box key={stat.label}>
+                    <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontSize: '0.95rem', fontWeight: 700, color: '#F1F5F9', lineHeight: 1.1 }}>
+                      {loading ? '-' : stat.value}
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '0.58rem', color: '#64748B', textTransform: 'none', letterSpacing: 0 }}>
+                      {stat.label}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           </Box>
-        </Box>
-      )}
+        )}
     </Drawer>
   )
 }

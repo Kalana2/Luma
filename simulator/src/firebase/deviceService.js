@@ -1,6 +1,12 @@
 import { db, ref, get, set, update, onValue } from './firebaseConfig'
 
+function ensureDb() {
+  if (!db) throw new Error('Firebase not initialized')
+  return db
+}
+
 export async function getFloors() {
+  ensureDb()
   const snapshot = await get(ref(db, 'floors'))
   if (snapshot.exists()) {
     return Object.entries(snapshot.val()).map(([id, data]) => ({ id, ...data }))
@@ -123,6 +129,7 @@ export async function triggerDeviceDisconnected(deviceId) {
 }
 
 export async function seedSampleData() {
+  ensureDb()
   const seedDevices = {
     'device-001': {
       type: 'light',

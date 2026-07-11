@@ -9,7 +9,7 @@ import {
   Breadcrumbs,
   alpha,
 } from '@mui/material'
-import { ChevronRight, Storage, Wifi, WifiOff } from '@mui/icons-material'
+import { ChevronRight, Storage } from '@mui/icons-material'
 import { seedSampleData } from '../firebase/deviceService'
 
 const floorNames = {
@@ -27,11 +27,11 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
   }, [])
 
   const statusConfig = {
-    connected: { label: 'Live', color: '#10B981', bg: alpha('#10B981', 0.1), Icon: Wifi },
-    connecting: { label: 'Syncing', color: '#F59E0B', bg: alpha('#F59E0B', 0.1), Icon: Wifi },
-    error: { label: 'Offline', color: '#EF4444', bg: alpha('#EF4444', 0.1), Icon: WifiOff },
+    connected: { label: 'Live', color: '#10B981', bg: alpha('#10B981', 0.1) },
+    connecting: { label: 'Syncing', color: '#F59E0B', bg: alpha('#F59E0B', 0.1) },
+    error: { label: 'Offline', color: '#EF4444', bg: alpha('#EF4444', 0.1) },
   }
-  const { label: statusLabel, color: statusColor, bg: statusBg, Icon: StatusIcon } =
+  const { label: statusLabel, color: statusColor, bg: statusBg } =
     statusConfig[connectionStatus] || statusConfig.connecting
 
   const handleSeedData = async () => {

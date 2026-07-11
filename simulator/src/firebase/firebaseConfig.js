@@ -12,8 +12,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const app = initializeApp(firebaseConfig)
-const db = getDatabase(app)
-const auth = getAuth(app)
+let app, db, auth
+
+try {
+  app = initializeApp(firebaseConfig)
+  db = getDatabase(app)
+  auth = getAuth(app)
+} catch (err) {
+  console.error('Firebase init failed:', err)
+  db = null
+  auth = null
+}
 
 export { db, auth, ref, onValue, off, get, set, update, signInAnonymously, onAuthStateChanged }
