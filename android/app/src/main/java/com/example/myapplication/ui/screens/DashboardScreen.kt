@@ -1,15 +1,20 @@
 package com.example.myapplication.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -107,54 +112,74 @@ fun DashboardScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Lumaa") },
+                    title = { 
+                        Text(
+                            "Lumaa", 
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge 
+                        ) 
+                    },
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch { drawerState.open() }
                         }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { showAddFloorDialog = true }) {
+                FloatingActionButton(
+                    onClick = { showAddFloorDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Floor")
                 }
-            }
+            },
+            containerColor = MaterialTheme.colorScheme.background
         ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp)
+                    .padding(horizontal = 24.dp)
             ) {
+                Spacer(modifier = Modifier.height(16.dp))
                 val greeting = getGreeting()
                 Text(
                     text = "$greeting,",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
                 Text(
                     text = userName,
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
                     text = "Your Floors",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(floors) { floor ->
                         FloorCard(
@@ -211,12 +236,13 @@ fun FloorCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f),
-        onClick = onClick
+            .height(180.dp),
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFEBEBF5) // Light lavender/grey background matching screenshot
+        )
     ) {
-        // Long click handling for Card is not direct in Material3 Card, might need to wrap in box or use combinedClickable
-        // For simplicity using standard onClick and adding an overflow icon or separate long click logic
-        // But the requirement says "long-press or overflow menu"
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
@@ -228,20 +254,45 @@ fun FloorCard(
                 Icon(
                     imageVector = getIconForName(floor.iconName),
                     contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(42.dp),
+                    tint = Color(0xFF5D6A9E) // Darker blue icon matching screenshot
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = floor.name, fontWeight = FontWeight.Bold, maxLines = 1)
-                Text(text = "${floor.roomCount} Rooms", style = MaterialTheme.typography.bodySmall)
-                Text(text = "${floor.activeDevices} Devices ON", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = floor.name, 
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color(0xFF333333)
+                )
+                
+                Text(
+                    text = "${floor.roomCount} Rooms",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                
+                Text(
+                    text = "${floor.activeDevices} Devices ON",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
             }
             
             IconButton(
                 onClick = onLongClick,
-                modifier = Modifier.align(Alignment.TopEnd)
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
             ) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                Icon(
+                    Icons.Default.MoreVert, 
+                    contentDescription = "Options",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
@@ -259,25 +310,48 @@ fun FloorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (floor == null) "Add Floor" else "Edit Floor") },
+        title = { 
+            Text(
+                if (floor == null) "Add Floor" else "Edit Floor",
+                fontWeight = FontWeight.Bold
+            ) 
+        },
+        shape = RoundedCornerShape(28.dp),
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Floor Name") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Select Icon")
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Select Icon", fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.height(12.dp))
                 // Simplified icon picker
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     listOf("Home", "Info", "Settings", "List").forEach { iconName ->
-                        IconButton(onClick = { selectedIcon = iconName }) {
+                        val isSelected = selectedIcon == iconName
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer 
+                                    else Color.Transparent
+                                )
+                                .clickable { selectedIcon = iconName },
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = getIconForName(iconName),
                                 contentDescription = iconName,
-                                tint = if (selectedIcon == iconName) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary 
+                                       else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -285,7 +359,10 @@ fun FloorDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(name, selectedIcon) }) {
+            Button(
+                onClick = { onConfirm(name, selectedIcon) },
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Save")
             }
         },
