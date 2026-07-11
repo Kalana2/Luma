@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,7 +54,7 @@ fun DashboardScreen(
     var floors by remember { mutableStateOf<List<Floor>>(emptyList()) }
     var showAddFloorDialog by remember { mutableStateOf(false) }
     var floorToEdit by remember { mutableStateOf<Floor?>(null) }
-    var selectedCategory by remember { mutableStateOf(0) }
+    var selectedCategoryIndex by remember { mutableStateOf(0) }
 
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
@@ -158,11 +159,11 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(onClick = { }) { Icon(Icons.Default.Home, contentDescription = null, tint = LumaPrimary) }
-                            IconButton(onClick = { }) { Icon(Icons.Default.DateRange, contentDescription = null, tint = Color.LightGray) }
+                            IconButton(onClick = { }) { Icon(Icons.Default.List, contentDescription = null, tint = Color.LightGray) }
                             
                             Spacer(modifier = Modifier.width(48.dp)) // Space for FAB
                             
-                            IconButton(onClick = { }) { Icon(Icons.Default.Info, contentDescription = null, tint = Color.LightGray) }
+                            IconButton(onClick = { }) { Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.LightGray) }
                             IconButton(onClick = { }) { Icon(Icons.Default.Settings, contentDescription = null, tint = Color.LightGray) }
                         }
                     }
@@ -183,7 +184,7 @@ fun DashboardScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    val categories = listOf("All Floors") + floors.map { it.name }
+                    val categories = listOf("Living Room", "Drawing Room", "Kitchen", "Dining", "Office")
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(20.dp),
                         contentPadding = PaddingValues(vertical = 8.dp)
@@ -192,11 +193,11 @@ fun DashboardScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = category,
-                                    color = if (selectedCategory == index) Color.Black else Color.Gray,
-                                    fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Normal,
-                                    modifier = Modifier.clickable { selectedCategory = index }
+                                    color = if (selectedCategoryIndex == index) Color.Black else Color.Gray,
+                                    fontWeight = if (selectedCategoryIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.clickable { selectedCategoryIndex = index }
                                 )
-                                if (selectedCategory == index) {
+                                if (selectedCategoryIndex == index) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Box(modifier = Modifier.width(20.dp).height(2.dp).background(LumaPrimary))
                                 }
@@ -293,9 +294,9 @@ fun FloorCard(
             .fillMaxWidth()
             .height(160.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = LumaCardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -306,12 +307,20 @@ fun FloorCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    imageVector = getIconForName(floor.iconName),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = if (floor.isOn) LumaPrimary else Color.DarkGray
-                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (floor.isOn) LumaPrimary.copy(alpha = 0.1f) else Color.Transparent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = getIconForName(floor.iconName),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = if (floor.isOn) LumaPrimary else Color.DarkGray
+                    )
+                }
                 Switch(
                     checked = floor.isOn,
                     onCheckedChange = onToggle,
@@ -319,10 +328,10 @@ fun FloorCard(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = LumaPrimary,
                         uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color.LightGray,
+                        uncheckedTrackColor = Color.LightGray.copy(alpha = 0.5f),
                         uncheckedBorderColor = Color.Transparent
                     ),
-                    modifier = Modifier.scale(0.8f)
+                    modifier = Modifier.scale(0.7f)
                 )
             }
             
@@ -330,31 +339,18 @@ fun FloorCard(
                 Text(
                     text = floor.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
                 Text(
-                    text = "${floor.roomCount} Rooms",
+                    text = if (floor.roomCount > 0) "Floor description here" else "Smart Device",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
-            
-            IconButton(
-                onClick = onLongClick,
-                modifier = Modifier.align(Alignment.End).size(24.dp)
-            ) {
-                Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.LightGray)
-            }
         }
     }
 }
-
-// Extension to scale switch
-@Composable
-fun Modifier.scale(scale: Float) = this.then(
-    androidx.compose.ui.draw.scale(scale)
-)
 
 @Composable
 fun FloorDialog(
@@ -368,48 +364,24 @@ fun FloorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
-            Text(
-                if (floor == null) "Add Floor" else "Edit Floor",
-                fontWeight = FontWeight.Bold
-            ) 
-        },
-        shape = RoundedCornerShape(28.dp),
+        title = { Text(if (floor == null) "Add Floor" else "Edit Floor") },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Floor Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Select Icon", fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(12.dp))
-                // Simplified icon picker
-                Row(
-                    modifier = Modifier.fillMaxWidth(), 
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Select Icon")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     listOf("Home", "Info", "Settings", "List").forEach { iconName ->
-                        val isSelected = selectedIcon == iconName
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primaryContainer 
-                                    else Color.Transparent
-                                )
-                                .clickable { selectedIcon = iconName },
-                            contentAlignment = Alignment.Center
-                        ) {
+                        IconButton(onClick = { selectedIcon = iconName }) {
                             Icon(
                                 imageVector = getIconForName(iconName),
                                 contentDescription = iconName,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary 
-                                       else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (selectedIcon == iconName) LumaPrimary else Color.Gray
                             )
                         }
                     }
@@ -417,10 +389,7 @@ fun FloorDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onConfirm(name, selectedIcon) },
-                shape = RoundedCornerShape(12.dp)
-            ) {
+            Button(onClick = { onConfirm(name, selectedIcon) }, colors = ButtonDefaults.buttonColors(containerColor = LumaPrimary)) {
                 Text("Save")
             }
         },
