@@ -35,6 +35,7 @@ import {
   WarningAmber,
 } from '@mui/icons-material'
 
+const C = { gold: '#C9A84C', navy: '#1E3A5F', champagne: '#E8D5A3', platinum: '#C4B5D0', muted: '#7C6B8A', dark: '#0F1D35', emerald: '#0D9488' }
 const iconMap = { home: Home, stairs: Stairs, attic: Roofing }
 
 function AnimatedNumber({ value, duration = 800 }) {
@@ -195,18 +196,18 @@ export default function FloorOverviewPage({ selectedFloorId }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: alpha('#3B82F6', 0.08),
-            border: `1px solid ${alpha('#3B82F6', 0.1)}`,
+            bgcolor: alpha(C.navy, 0.08),
+            border: `1px solid ${alpha(C.gold, 0.1)}`,
             mx: 'auto',
             mb: 3,
           }}
         >
-          <Settings sx={{ fontSize: 28, color: '#64748B' }} />
+          <Settings sx={{ fontSize: 28, color: C.muted }} />
         </Box>
-        <Typography variant="h5" sx={{ color: '#F1F5F9', fontWeight: 500 }}>
+        <Typography variant="h5" sx={{ color: C.champagne, fontWeight: 500 }}>
           Select a Floor
         </Typography>
-        <Typography variant="body2" sx={{ color: '#64748B', maxWidth: 320, mx: 'auto' }}>
+        <Typography variant="body2" sx={{ color: C.muted, maxWidth: 320, mx: 'auto' }}>
           Choose a floor from the sidebar to view and control its devices.
         </Typography>
       </Box>
@@ -224,8 +225,8 @@ export default function FloorOverviewPage({ selectedFloorId }) {
   if (!floor) {
     return (
       <Box sx={{ textAlign: 'center', pt: 12 }}>
-        <Typography variant="h5" sx={{ color: '#F1F5F9', mb: 1 }}>Floor not found</Typography>
-        <Typography variant="body2" sx={{ color: '#64748B' }}>Try selecting a different floor.</Typography>
+        <Typography variant="h5" sx={{ color: C.champagne, mb: 1 }}>Floor not found</Typography>
+        <Typography variant="body2" sx={{ color: C.muted }}>Try selecting a different floor.</Typography>
       </Box>
     )
   }
@@ -242,17 +243,17 @@ export default function FloorOverviewPage({ selectedFloorId }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: alpha('#3B82F6', 0.08),
-              border: `1px solid ${alpha('#3B82F6', 0.1)}`,
-            }}
-          >
-            {React.createElement(iconMap[floor.icon] || Home, { sx: { fontSize: 20, color: '#93C5FD' } })}
+            bgcolor: alpha(C.navy, 0.08),
+            border: `1px solid ${alpha(C.gold, 0.1)}`,
+          }}
+        >
+          {React.createElement(iconMap[floor.icon] || Home, { sx: { fontSize: 20, color: C.gold } })}
           </Box>
           <Box>
-            <Typography variant="h4" sx={{ color: '#F1F5F9', fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ color: C.champagne, fontWeight: 600 }}>
               {floor.name}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#64748B' }}>
+            <Typography variant="body2" sx={{ color: C.muted }}>
               {allRoomEntries.length} rooms &middot; <AnimatedNumber value={totalDevices} /> devices
             </Typography>
           </Box>
@@ -264,10 +265,10 @@ export default function FloorOverviewPage({ selectedFloorId }) {
             startIcon={<Add sx={{ fontSize: 16 }} />}
             onClick={() => setAddRoomOpen(true)}
             sx={{
-              borderColor: alpha('#3B82F6', 0.15),
-              color: '#94A3B8',
-              transition: 'all 0.3s ease',
-              '&:hover': { borderColor: alpha('#3B82F6', 0.3), color: '#93C5FD', transform: 'translateY(-1px)' },
+            borderColor: alpha(C.gold, 0.12),
+            color: C.platinum,
+            transition: 'all 0.3s ease',
+            '&:hover': { borderColor: alpha(C.gold, 0.25), color: C.gold, transform: 'translateY(-1px)' },
             }}
           >
             Add Room
@@ -288,9 +289,9 @@ export default function FloorOverviewPage({ selectedFloorId }) {
       {totalDevices > 0 && (
         <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
           {[
-            { label: 'Total', value: totalDevices, color: '#3B82F6', Icon: Bolt },
-            { label: 'Active', value: onDevices, color: '#10B981', Icon: ToggleOn },
-            { label: 'Alerts', value: errorDevices, color: '#EF4444', Icon: WarningAmber },
+            { label: 'Total', value: totalDevices, color: '#C9A84C', Icon: Bolt },
+            { label: 'Active', value: onDevices, color: '#0D9488', Icon: ToggleOn },
+            { label: 'Alerts', value: errorDevices, color: '#BE123C', Icon: WarningAmber },
           ].map(({ label, value, color, Icon }) => (
             <Box
               key={label}
@@ -341,8 +342,8 @@ export default function FloorOverviewPage({ selectedFloorId }) {
             p: 6,
             borderRadius: 3,
             textAlign: 'center',
-            border: `1px solid ${alpha('#3B82F6', 0.08)}`,
-            bgcolor: alpha('#0F172A', 0.5),
+            border: `1px solid rgba(201,168,76,0.06)`,
+            bgcolor: alpha(C.dark, 0.5),
             animation: 'fade-slide-up 0.5s ease-out both',
           }}
         >
@@ -354,18 +355,18 @@ export default function FloorOverviewPage({ selectedFloorId }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: alpha('#3B82F6', 0.06),
-              border: `1px solid ${alpha('#3B82F6', 0.08)}`,
+              bgcolor: alpha(C.navy, 0.06),
+              border: `1px solid ${alpha(C.gold, 0.06)}`,
               mx: 'auto',
               mb: 2,
             }}
           >
-            <Bolt sx={{ fontSize: 24, color: '#64748B' }} />
+            <Bolt sx={{ fontSize: 24, color: C.muted }} />
           </Box>
-          <Typography variant="h6" sx={{ color: '#64748B', fontWeight: 400 }}>
+          <Typography variant="h6" sx={{ color: C.muted, fontWeight: 400 }}>
             {Object.keys(allRooms).length === 0 ? 'No rooms on this floor' : 'No devices on this floor'}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#475569' }}>
+          <Typography variant="body2" sx={{ color: C.muted }}>
             {Object.keys(allRooms).length === 0
               ? 'Click Add Room to create a room, then add devices.'
               : 'Click Add Device to add devices to existing rooms.'}
@@ -393,7 +394,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
                   className="room-chevron"
                   sx={{
                     fontSize: 18,
-                    color: '#475569',
+                    color: C.muted,
                     transition: 'all 0.3s ease',
                     transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
                   }}
@@ -401,7 +402,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#475569',
+                    color: C.muted,
                     fontSize: '0.62rem',
                     letterSpacing: '0.12em',
                     fontWeight: 600,
@@ -413,10 +414,10 @@ export default function FloorOverviewPage({ selectedFloorId }) {
                   size="small"
                   onClick={(e) => { e.stopPropagation(); setDeletingRoomId(roomId); setDeleteRoomOpen(true) }}
                   sx={{
-                    color: alpha('#EF4444', 0.4),
+                    color: alpha('#BE123C', 0.4),
                     p: 0.3,
                     transition: 'all 0.2s ease',
-                    '&:hover': { color: '#EF4444', bgcolor: alpha('#EF4444', 0.06) },
+                    '&:hover': { color: '#BE123C', bgcolor: alpha('#BE123C', 0.06) },
                   }}
                 >
                   <Delete sx={{ fontSize: 14 }} />
