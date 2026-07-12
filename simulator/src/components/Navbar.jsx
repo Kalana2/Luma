@@ -52,7 +52,7 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
               <Box component="img" src="/logo.png" alt="" sx={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 2px 12px rgba(30,58,95,0.4))' }} />
             </Box>
             <Box>
-              <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.3, color: C.champagne }}>Luma</Typography>
+              <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.3, color: C.champagne }}>Lumaa</Typography>
               <Typography variant="caption" sx={{ fontSize: '0.55rem', color: C.muted, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>Hardware Simulator</Typography>
             </Box>
           </Box>
