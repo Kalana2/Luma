@@ -1,12 +1,17 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ThemeProvider, createTheme, Box, alpha } from '@mui/material'
-import { auth, signInAnonymously, onAuthStateChanged } from './firebase/firebaseConfig'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { ThemeProvider, createTheme, Box, alpha, CircularProgress } from '@mui/material'
+import { ref, push } from 'firebase/database'
+import { auth, db, onAuthStateChanged } from './firebase/firebaseConfig'
+import { LogContext } from './contexts/LogContext'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import FloorOverviewPage from './pages/FloorOverviewPage'
 import DeviceDetailPage from './pages/DeviceDetailPage'
 import CameraFeedPage from './pages/CameraFeedPage'
+import Footer from './components/Footer'
+import AboutDialog from './components/AboutDialog'
+import LoginPage from './pages/LoginPage'
 
 const royalTheme = createTheme({
   palette: {
@@ -178,34 +183,96 @@ const royalTheme = createTheme({
 
 function AppInner() {
   const [connectionStatus, setConnectionStatus] = useState('connecting')
-  const [selectedFloorId, setSelectedFloorId] = useState(null)
+  const [user, setUser] = useState(null)
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
-    if (!auth) { setConnectionStatus('error'); return }
-    signInAnonymously(auth).then(() => setConnectionStatus('connected')).catch(() => setConnectionStatus('error'))
-    const unsub = onAuthStateChanged(auth, (u) => setConnectionStatus(u ? 'connected' : 'error'))
+    if (!auth) { setConnectionStatus('error'); setInitializing(false); return }
+    auth.signOut().catch(() => {})
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u)
+      setConnectionStatus(u ? 'connected' : 'error')
+      setInitializing(false)
+    })
     return unsub
   }, [])
 
-  return (
-    <BrowserRouter>
-      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#0A1628' }}>
-        <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-          <Box sx={{ position: 'absolute', top: '-15%', right: '-10%', width: 800, height: 800, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,58,95,0.06), transparent 60%)', filter: 'blur(100px)', animation: 'float-orb-1 28s ease-in-out infinite' }} />
-          <Box sx={{ position: 'absolute', bottom: '-15%', left: '-10%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.03), transparent 60%)', filter: 'blur(100px)', animation: 'float-orb-2 32s ease-in-out infinite' }} />
-        </Box>
+  const logEvent = useCallback((event, details = {}) => {
+    if (!user?.uid) return
+    try {
+      const logRef = ref(db, `userLogs/${user.uid}`)
+      push(logRef, {
+        environment: 'simulator',
+        device: navigator.userAgent || 'unknown',
+        event,
+        timestamp: Date.now(),
+        details,
+      }).catch(() => {})
+    } catch {}
+  }, [user])
 
-        <Navbar connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} />
-        <Sidebar selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
-        <Box component="main" sx={{ flexGrow: 1, mt: 9, ml: '252px', p: 4, position: 'relative', zIndex: 1 }}>
+  if (initializing) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#0A1628', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size={32} sx={{ color: '#C9A84C' }} />
+      </Box>
+    )
+  }
+
+  if (!user) {
+    return <LoginPage />
+  }
+
+  return (
+    <LogContext.Provider value={logEvent}>
+      <BrowserRouter>
+        <AppLayout connectionStatus={connectionStatus} logEvent={logEvent} onOpenAbout={() => setAboutOpen(true)} />
+      </BrowserRouter>
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+    </LogContext.Provider>
+  )
+}
+
+function AppLayout({ connectionStatus, logEvent, onOpenAbout }) {
+  const location = useLocation()
+  const prevPathRef = useRef('')
+  const [selectedFloorId, setSelectedFloorId] = useState(null)
+
+  useEffect(() => {
+    const prev = prevPathRef.current
+    if (prev && prev !== location.pathname) {
+      logEvent('page_navigation', { from: prev, to: location.pathname })
+    }
+    prevPathRef.current = location.pathname
+  }, [location.pathname, logEvent])
+
+  useEffect(() => {
+    if (selectedFloorId) {
+      logEvent('floor_select', { floorId: selectedFloorId })
+    }
+  }, [selectedFloorId, logEvent])
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#0A1628' }}>
+      <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        <Box sx={{ position: 'absolute', top: '-15%', right: '-10%', width: 800, height: 800, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,58,95,0.06), transparent 60%)', filter: 'blur(100px)', animation: 'float-orb-1 28s ease-in-out infinite' }} />
+        <Box sx={{ position: 'absolute', bottom: '-15%', left: '-10%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.03), transparent 60%)', filter: 'blur(100px)', animation: 'float-orb-2 32s ease-in-out infinite' }} />
+      </Box>
+
+          <Navbar connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} onLogout={() => auth?.signOut()} />
+      <Sidebar selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
+      <Box component="main" sx={{ flexGrow: 1, mt: 9, ml: '252px', p: 4, pb: 2, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<FloorOverviewPage selectedFloorId={selectedFloorId} />} />
             <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
             <Route path="/camera/:deviceId" element={<CameraFeedPage />} />
           </Routes>
         </Box>
+        <Footer onAboutClick={onOpenAbout} />
       </Box>
-    </BrowserRouter>
+    </Box>
   )
 }
 

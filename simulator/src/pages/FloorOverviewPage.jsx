@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LogContext } from '../contexts/LogContext'
 import {
   Box,
   Typography,
@@ -137,7 +138,16 @@ export default function FloorOverviewPage({ selectedFloorId }) {
     return () => unsubs.forEach((u) => u())
   }, [selectedFloorId])
 
+  const logEvent = useContext(LogContext)
+
+  useEffect(() => {
+    if (selectedFloorId && floor) {
+      logEvent('dashboard_view', { floorId: selectedFloorId, floorName: floor.name })
+    }
+  }, [selectedFloorId, floor?.name])
+
   const handleToggle = async (deviceId, state) => {
+    logEvent('device_toggle', { deviceId, state, floorId: selectedFloorId })
     await setDeviceState(deviceId, state)
   }
 

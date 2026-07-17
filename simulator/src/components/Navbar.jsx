@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Box, Typography, Chip, Button, Breadcrumbs, alpha } from '@mui/material'
-import { ChevronRight, Storage } from '@mui/icons-material'
+import { AppBar, Toolbar, Box, Typography, Chip, Button, Breadcrumbs, alpha, IconButton, Tooltip } from '@mui/material'
+import { ChevronRight, Storage, Logout } from '@mui/icons-material'
 import { seedSampleData } from '../firebase/deviceService'
 
 const floorNames = { 'floor-001': 'Ground Floor', 'floor-002': 'First Floor', 'floor-003': 'Second Floor' }
 
-export default function Navbar({ connectionStatus, selectedFloorId }) {
+export default function Navbar({ connectionStatus, selectedFloorId, onLogout }) {
   const [seedStatus, setSeedStatus] = useState('idle')
   const [mounted, setMounted] = useState(false)
 
@@ -79,6 +79,21 @@ export default function Navbar({ connectionStatus, selectedFloorId }) {
             </Box>
             <Typography variant="caption" sx={{ color: status.color, textTransform: 'none', letterSpacing: '0.04em', fontWeight: 600, fontSize: '0.68rem' }}>{status.label}</Typography>
           </Box>
+          {onLogout && (
+            <Tooltip title="Logout" arrow>
+              <IconButton
+                size="small"
+                onClick={onLogout}
+                sx={{
+                  color: C.muted, width: 32, height: 32,
+                  borderRadius: 2,
+                  '&:hover': { color: '#BE123C', bgcolor: alpha('#BE123C', 0.06) },
+                }}
+              >
+                <Logout sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
