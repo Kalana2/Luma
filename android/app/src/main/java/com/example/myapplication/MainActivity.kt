@@ -11,7 +11,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.screens.SignInScreen
 import com.example.myapplication.ui.screens.SignUpScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
+import com.example.myapplication.ui.screens.HomeScreen
+import com.example.myapplication.ui.screens.ProfileScreen
 import com.example.myapplication.ui.theme.LumaaTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,8 +31,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
+    val startDestination = if (auth.currentUser != null) "home" else "welcome"
 
-    NavHost(navController = navController, startDestination = "welcome") {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("welcome") {
             WelcomeScreen(
                 onSignInClick = { navController.navigate("signin") },
@@ -37,10 +42,31 @@ fun AppNavigation() {
             )
         }
         composable("signin") {
-            SignInScreen(onBackClick = { navController.popBackStack() })
+            SignInScreen(
+                onBackClick = { navController.popBackStack() },
+                onSignInSuccess = { 
+                    navController.navigate("home") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                }
+            )
         }
         composable("signup") {
             SignUpScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable("home") {
+            HomeScreen(
+                onLogout = {
+                    auth.signOut()
+                    navController.navigate("welcome") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                },
+                onProfileClick = { navController.navigate("profile") }
+            )
+        }
+        composable("profile") {
+            ProfileScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

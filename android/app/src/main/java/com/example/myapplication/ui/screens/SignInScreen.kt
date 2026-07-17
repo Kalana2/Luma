@@ -14,12 +14,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.ui.pages_controllers.login
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(onBackClick: () -> Unit) {
+fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -72,14 +77,33 @@ fun SignInScreen(onBackClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Login", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = {
+                        if (email.isNotEmpty() && password.isNotEmpty()) {
+                            isLoading = true
+                            login(email, password) { success, message ->
+                                isLoading = false
+                                if (success) {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    onSignInSuccess()
+                                } else {
+                                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        } else {
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Login", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
