@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { LogContext } from '../contexts/LogContext'
 import {
   Box,
   Typography,
@@ -55,6 +56,14 @@ export default function DeviceDetailPage() {
   const [scheduleEnd, setScheduleEnd] = useState('')
   const [maxDuration, setMaxDuration] = useState(30)
 
+  const logEvent = useContext(LogContext)
+
+  useEffect(() => {
+    if (device) {
+      logEvent('device_detail_view', { deviceId, deviceType: device.type, deviceName: device.name })
+    }
+  }, [device?.name])
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
@@ -79,11 +88,15 @@ export default function DeviceDetailPage() {
   const status = device.type === 'camera' ? (device.status || 'ONLINE') : (device.status || device.state || 'OFF')
 
   const handleToggle = async (on) => {
-    await setDeviceState(deviceId, on ? 'ON' : 'OFF')
+    const newState = on ? 'ON' : 'OFF'
+    logEvent('device_toggle', { deviceId, deviceType: device.type, state: newState })
+    await setDeviceState(deviceId, newState)
   }
 
   const handleSwitchToggle = async (switchKey, currentState) => {
-    await setSwitchState(deviceId, switchKey, currentState === 'ON' ? 'OFF' : 'ON')
+    const newState = currentState === 'ON' ? 'OFF' : 'ON'
+    logEvent('switch_toggle', { deviceId, switchKey, state: newState })
+    await setSwitchState(deviceId, switchKey, newState)
   }
 
   const handleScheduleSave = async () => {

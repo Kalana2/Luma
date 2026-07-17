@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getDatabase, ref, onValue, off, get, set, update, connectDatabaseEmulator } from 'firebase/database'
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
+import { getAuth, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-api-key',
@@ -31,4 +31,4 @@ try {
   auth = null
 }
 
-export { db, auth, ref, onValue, off, get, set, update, signInAnonymously, onAuthStateChanged }
+export { db, auth, ref, onValue, off, get, set, update, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged }
