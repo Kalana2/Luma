@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { ThemeProvider, createTheme, Box, alpha, CircularProgress } from '@mui/material'
+import { ThemeProvider, createTheme, Box, alpha, CircularProgress, Typography } from '@mui/material'
 import { ref, push, get as fbGet } from 'firebase/database'
 import { auth, db, onAuthStateChanged } from './firebase/firebaseConfig'
 import { LogContext } from './contexts/LogContext'
