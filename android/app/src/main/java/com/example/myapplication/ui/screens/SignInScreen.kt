@@ -27,6 +27,7 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
     val context = LocalContext.current
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Sign In") },
@@ -60,7 +61,8 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -72,7 +74,8 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(32.dp))
