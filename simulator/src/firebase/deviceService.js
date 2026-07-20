@@ -5,17 +5,17 @@ function ensureDb() {
   return db
 }
 
-export async function getFloors() {
+export async function getFloors(userId) {
   ensureDb()
-  const snapshot = await get(ref(db, 'floors'))
+  const snapshot = await get(ref(db, `users/${userId}/floors`))
   if (snapshot.exists()) {
     return Object.entries(snapshot.val()).map(([id, data]) => ({ id, ...data }))
   }
   return []
 }
 
-export async function getFloor(floorId) {
-  const snapshot = await get(ref(db, `floors/${floorId}`))
+export async function getFloor(userId, floorId) {
+  const snapshot = await get(ref(db, `users/${userId}/floors/${floorId}`))
   if (snapshot.exists()) {
     return { id: floorId, ...snapshot.val() }
   }
@@ -30,8 +30,8 @@ export async function getDevice(deviceId) {
   return null
 }
 
-export async function getDevicesByFloor(floorId) {
-  const floor = await getFloor(floorId)
+export async function getDevicesByFloor(userId, floorId) {
+  const floor = await getFloor(userId, floorId)
   if (!floor || !floor.rooms) return []
 
   const deviceIds = new Set()
@@ -54,10 +54,10 @@ export async function getDevicesByFloor(floorId) {
     .filter(Boolean)
 }
 
-export function getFloorDevicesLive(floorId, callback) {
+export function getFloorDevicesLive(userId, floorId, callback) {
   const devicesRef = ref(db, 'devices')
   return onValue(devicesRef, async () => {
-    const devices = await getDevicesByFloor(floorId)
+    const devices = await getDevicesByFloor(userId, floorId)
     callback(devices)
   })
 }
@@ -128,7 +128,7 @@ export async function triggerDeviceDisconnected(deviceId) {
   await set(ref(db, `devices/${deviceId}/lastSeen`), 0)
 }
 
-export async function seedSampleData() {
+export async function seedSampleData(userId) {
   ensureDb()
   const seedDevices = {
     'device-001': {
@@ -139,6 +139,7 @@ export async function seedSampleData() {
       lastSeen: Date.now(),
       startTime: '18:00',
       endTime: '23:00',
+      userId,
     },
     'device-002': {
       type: 'outlet',
@@ -146,6 +147,7 @@ export async function seedSampleData() {
       state: 'OFF',
       status: 'OFF',
       lastSeen: Date.now(),
+      userId,
     },
     'device-003': {
       type: 'iron',
@@ -155,6 +157,7 @@ export async function seedSampleData() {
       lastSeen: Date.now(),
       turnedOnAt: null,
       maxDurationMinutes: 30,
+      userId,
     },
     'device-004': {
       type: 'switchPanel',
@@ -163,6 +166,7 @@ export async function seedSampleData() {
       switches: { switch1: 'OFF', switch2: 'OFF', switch3: 'OFF' },
       status: 'OFF',
       lastSeen: Date.now(),
+      userId,
     },
     'device-005': {
       type: 'camera',
@@ -171,7 +175,13 @@ export async function seedSampleData() {
       lastSeen: Date.now(),
       lastSnapshotUrl: 'https://picsum.photos/seed/camera-garage/640/480',
       lastSnapshotAt: Date.now(),
+      userId,
     },
+  }
+
+  const userDeviceIndex = {}
+  for (const did of Object.keys(seedDevices)) {
+    userDeviceIndex[`users/${userId}/devices/${did}`] = true
   }
 
   const seedFloors = {
@@ -200,7 +210,11 @@ export async function seedSampleData() {
     },
   }
 
-  await update(ref(db), { floors: seedFloors, devices: seedDevices })
+  await update(ref(db), {
+    devices: seedDevices,
+    ...userDeviceIndex,
+    [`users/${userId}/floors`]: seedFloors,
+  })
   return { floors: seedFloors, devices: seedDevices }
 }
 
@@ -208,10 +222,10 @@ function generateId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 }
 
-export async function addFloor(name, icon) {
+export async function addFloor(userId, name, icon) {
   ensureDb()
   const id = generateId('floor')
-  await set(ref(db, `floors/${id}`), {
+  await set(ref(db, `users/${userId}/floors/${id}`), {
     name,
     icon: icon || 'home',
     rooms: {},
@@ -219,19 +233,19 @@ export async function addFloor(name, icon) {
   return id
 }
 
-export async function updateFloor(floorId, data) {
+export async function updateFloor(userId, floorId, data) {
   ensureDb()
   const updates = {}
-  if (data.name) updates[`floors/${floorId}/name`] = data.name
-  if (data.icon) updates[`floors/${floorId}/icon`] = data.icon
+  if (data.name) updates[`users/${userId}/floors/${floorId}/name`] = data.name
+  if (data.icon) updates[`users/${userId}/floors/${floorId}/icon`] = data.icon
   if (Object.keys(updates).length > 0) {
     await update(ref(db), updates)
   }
 }
 
-export async function deleteFloor(floorId) {
+export async function deleteFloor(userId, floorId) {
   ensureDb()
-  const floorSnap = await get(ref(db, `floors/${floorId}`))
+  const floorSnap = await get(ref(db, `users/${userId}/floors/${floorId}`))
   if (!floorSnap.exists()) return
 
   const floor = floorSnap.val()
@@ -249,27 +263,28 @@ export async function deleteFloor(floorId) {
   }
 
   const updates = {}
-  updates[`floors/${floorId}`] = null
+  updates[`users/${userId}/floors/${floorId}`] = null
   for (const did of deviceIds) {
     updates[`devices/${did}`] = null
+    updates[`users/${userId}/devices/${did}`] = null
   }
 
   await update(ref(db), updates)
 }
 
-export async function addRoom(floorId, name) {
+export async function addRoom(userId, floorId, name) {
   ensureDb()
   const id = generateId('room')
-  await set(ref(db, `floors/${floorId}/rooms/${id}`), {
+  await set(ref(db, `users/${userId}/floors/${floorId}/rooms/${id}`), {
     name,
     devices: {},
   })
   return id
 }
 
-export async function deleteRoom(floorId, roomId) {
+export async function deleteRoom(userId, floorId, roomId) {
   ensureDb()
-  const roomSnap = await get(ref(db, `floors/${floorId}/rooms/${roomId}`))
+  const roomSnap = await get(ref(db, `users/${userId}/floors/${floorId}/rooms/${roomId}`))
   if (!roomSnap.exists()) return
 
   const room = roomSnap.val()
@@ -281,32 +296,36 @@ export async function deleteRoom(floorId, roomId) {
   }
 
   const updates = {}
-  updates[`floors/${floorId}/rooms/${roomId}`] = null
+  updates[`users/${userId}/floors/${floorId}/rooms/${roomId}`] = null
   for (const did of deviceIds) {
     updates[`devices/${did}`] = null
+    updates[`users/${userId}/devices/${did}`] = null
   }
 
   await update(ref(db), updates)
 }
 
-export async function addDevice(floorId, roomId, deviceData) {
+export async function addDevice(userId, floorId, roomId, deviceData) {
   ensureDb()
   const id = generateId('device')
   const device = {
     ...deviceData,
     lastSeen: Date.now(),
+    userId,
   }
   await set(ref(db, `devices/${id}`), device)
-  await set(ref(db, `floors/${floorId}/rooms/${roomId}/devices/${id}`), true)
+  await set(ref(db, `users/${userId}/floors/${floorId}/rooms/${roomId}/devices/${id}`), true)
+  await set(ref(db, `users/${userId}/devices/${id}`), true)
   return id
 }
 
-export async function deleteDevice(deviceId, floorId, roomId) {
+export async function deleteDevice(userId, deviceId, floorId, roomId) {
   ensureDb()
   const updates = {}
   updates[`devices/${deviceId}`] = null
+  if (userId) updates[`users/${userId}/devices/${deviceId}`] = null
   if (floorId && roomId) {
-    updates[`floors/${floorId}/rooms/${roomId}/devices/${deviceId}`] = null
+    updates[`users/${userId}/floors/${floorId}/rooms/${roomId}/devices/${deviceId}`] = null
   }
   await update(ref(db), updates)
 }

@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
 import { db, ref, onValue } from '../firebase/firebaseConfig'
 
-export default function useFloorList() {
+export default function useFloorList(userId) {
   const [floors, setFloors] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!db) {
+    if (!db || !userId) {
       setLoading(false)
       return
     }
 
-    const floorsRef = ref(db, 'floors')
+    const floorsRef = ref(db, `users/${userId}/floors`)
     const unsub = onValue(floorsRef, (snapshot) => {
       try {
         if (snapshot.exists()) {
@@ -42,7 +42,7 @@ export default function useFloorList() {
     })
 
     return () => unsub()
-  }, [])
+  }, [userId])
 
   return { floors, loading }
 }

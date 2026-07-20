@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Box, Typography, Chip, Button, Breadcrumbs, alpha, IconButton, Tooltip } from '@mui/material'
-import { ChevronRight, Storage, Logout } from '@mui/icons-material'
+import { AppBar, Toolbar, Box, Typography, Chip, Button, Breadcrumbs, alpha, IconButton, Tooltip, Menu, MenuItem, Avatar } from '@mui/material'
+import { ChevronRight, Storage, Logout, History, Person } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
 import { seedSampleData } from '../firebase/deviceService'
+import useUserProfile from '../hooks/useUserProfile'
 
 const floorNames = { 'floor-001': 'Ground Floor', 'floor-002': 'First Floor', 'floor-003': 'Second Floor' }
 
-export default function Navbar({ connectionStatus, selectedFloorId, onLogout }) {
+export default function Navbar({ userId, connectionStatus, selectedFloorId, onLogout }) {
+  const navigate = useNavigate()
   const [seedStatus, setSeedStatus] = useState('idle')
   const [mounted, setMounted] = useState(false)
+  const [profileMenu, setProfileMenu] = useState(null)
+  const { userData } = useUserProfile(userId)
+  const initials = (userData?.name || 'U').charAt(0).toUpperCase()
 
   useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
 
@@ -31,7 +37,7 @@ export default function Navbar({ connectionStatus, selectedFloorId, onLogout }) 
   const handleSeedData = async () => {
     setSeedStatus('loading')
     try {
-      await seedSampleData()
+      await seedSampleData(userId)
       setSeedStatus('success')
       setTimeout(() => setSeedStatus('idle'), 2500)
     } catch (err) {
@@ -64,6 +70,27 @@ export default function Navbar({ connectionStatus, selectedFloorId, onLogout }) 
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Tooltip title="View Logs & Reports" arrow>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<History sx={{ fontSize: 15 }} />}
+              onClick={() => navigate('/logs')}
+              sx={{
+                borderColor: alpha(C.gold, 0.2),
+                color: C.gold,
+                fontSize: '0.7rem',
+                px: 2,
+                py: 0.6,
+                height: 32,
+                fontWeight: 500,
+                borderRadius: 8,
+                '&:hover': { borderColor: alpha(C.gold, 0.4), color: C.gold, background: alpha(C.gold, 0.04) },
+              }}
+            >
+              Logs
+            </Button>
+          </Tooltip>
           {seedStatus === 'success' ? (
             <Chip size="small" icon={<Storage sx={{ fontSize: 14 }} />} label="Data Seeded" sx={{ bgcolor: alpha(C.emerald, 0.08), color: C.emerald, border: `1px solid ${alpha(C.emerald, 0.15)}`, fontWeight: 600, fontSize: '0.68rem', height: 30 }} />
           ) : (
@@ -79,21 +106,62 @@ export default function Navbar({ connectionStatus, selectedFloorId, onLogout }) 
             </Box>
             <Typography variant="caption" sx={{ color: status.color, textTransform: 'none', letterSpacing: '0.04em', fontWeight: 600, fontSize: '0.68rem' }}>{status.label}</Typography>
           </Box>
-          {onLogout && (
-            <Tooltip title="Logout" arrow>
-              <IconButton
-                size="small"
-                onClick={onLogout}
-                sx={{
-                  color: C.muted, width: 32, height: 32,
-                  borderRadius: 2,
-                  '&:hover': { color: '#BE123C', bgcolor: alpha('#BE123C', 0.06) },
-                }}
-              >
-                <Logout sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          )}
+          <Tooltip title="Account" arrow>
+            <IconButton
+              size="small"
+              onClick={(e) => setProfileMenu(e.currentTarget)}
+              sx={{
+                color: C.champagne, width: 34, height: 34,
+                borderRadius: 2,
+                bgcolor: alpha(C.navy, 0.15),
+                border: `1px solid ${alpha(C.gold, 0.1)}`,
+                '&:hover': { bgcolor: alpha(C.navy, 0.25), borderColor: alpha(C.gold, 0.2) },
+              }}
+            >
+              <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontSize: '0.7rem', fontWeight: 700 }}>
+                {initials}
+              </Typography>
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={profileMenu}
+            open={!!profileMenu}
+            onClose={() => setProfileMenu(null)}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 180,
+                background: 'linear-gradient(160deg, #1A0A2E, #241040)',
+                border: '1px solid rgba(201,168,76,0.08)',
+                borderRadius: 3,
+                boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                backgroundImage: 'none',
+              },
+            }}
+          >
+            <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${alpha(C.gold, 0.06)}` }}>
+              <Typography sx={{ color: C.champagne, fontSize: '0.82rem', fontWeight: 600 }}>
+                {userData?.name || 'User'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: C.muted, fontSize: '0.68rem' }}>
+                {userData?.email || userId}
+              </Typography>
+            </Box>
+            <MenuItem
+              onClick={() => { setProfileMenu(null); navigate('/profile') }}
+              sx={{ mx: 1, my: 0.3, borderRadius: 2, color: C.platinum, gap: 1.5, '&:hover': { bgcolor: alpha(C.navy, 0.08), color: C.gold } }}
+            >
+              <Person sx={{ fontSize: 16 }} />
+              <Typography sx={{ fontSize: '0.8rem' }}>Profile</Typography>
+            </MenuItem>
+            <MenuItem
+              onClick={() => { setProfileMenu(null); onLogout?.() }}
+              sx={{ mx: 1, my: 0.3, borderRadius: 2, color: '#BE123C', gap: 1.5, '&:hover': { bgcolor: alpha('#BE123C', 0.08) } }}
+            >
+              <Logout sx={{ fontSize: 16 }} />
+              <Typography sx={{ fontSize: '0.8rem' }}>Logout</Typography>
+            </MenuItem>
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

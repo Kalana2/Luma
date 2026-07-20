@@ -62,9 +62,9 @@ function AnimatedNumber({ value, duration = 800 }) {
   return <>{display}</>
 }
 
-export default function FloorOverviewPage({ selectedFloorId }) {
+export default function FloorOverviewPage({ userId, selectedFloorId }) {
   const navigate = useNavigate()
-  const { floors, loading: floorsLoading } = useFloorList()
+  const { floors, loading: floorsLoading } = useFloorList(userId)
   const [devices, setDevices] = useState([])
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [floorData, setFloorData] = useState(null)
@@ -89,7 +89,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
 
     const unsubs = []
 
-    const floorRef = ref(db, `floors/${selectedFloorId}`)
+    const floorRef = ref(db, `users/${userId}/floors/${selectedFloorId}`)
     const stopFloor = onValue(floorRef, (snap) => {
       if (snap.exists()) setFloorData(snap.val())
     })
@@ -99,7 +99,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
     const stopDevices = onValue(devicesRef, async (snapshot) => {
       try {
         const allDevices = snapshot.exists() ? snapshot.val() : {}
-        const floorSnap = await get(ref(db, `floors/${selectedFloorId}`))
+        const floorSnap = await get(ref(db, `users/${userId}/floors/${selectedFloorId}`))
         if (!floorSnap.exists()) {
           setDevices([])
           setFloorData(null)
@@ -136,7 +136,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
     unsubs.push(stopDevices)
 
     return () => unsubs.forEach((u) => u())
-  }, [selectedFloorId])
+  }, [selectedFloorId, userId])
 
   const logEvent = useContext(LogContext)
 
@@ -163,7 +163,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
 
   const handleAddRoom = async (name) => {
     try {
-      await addRoom(selectedFloorId, name)
+      await addRoom(userId, selectedFloorId, name)
     } catch (err) {
       alert('Failed to add room: ' + (err.message || err.code))
     }
@@ -171,7 +171,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
 
   const handleAddDevice = async (roomId, deviceData) => {
     try {
-      await addDevice(selectedFloorId, roomId, deviceData)
+      await addDevice(userId, selectedFloorId, roomId, deviceData)
     } catch (err) {
       alert('Failed to add device: ' + (err.message || err.code))
     }
@@ -179,7 +179,7 @@ export default function FloorOverviewPage({ selectedFloorId }) {
 
   const handleDeleteRoom = async () => {
     if (deletingRoomId) {
-      await deleteRoom(selectedFloorId, deletingRoomId)
+      await deleteRoom(userId, selectedFloorId, deletingRoomId)
       setDeletingRoomId(null)
     }
   }

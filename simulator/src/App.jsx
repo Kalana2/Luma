@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider, createTheme, Box, alpha, CircularProgress } from '@mui/material'
-import { ref, push } from 'firebase/database'
+import { ref, push, get as fbGet } from 'firebase/database'
 import { auth, db, onAuthStateChanged } from './firebase/firebaseConfig'
 import { LogContext } from './contexts/LogContext'
+import { seedSampleData } from './firebase/deviceService'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import FloorOverviewPage from './pages/FloorOverviewPage'
 import DeviceDetailPage from './pages/DeviceDetailPage'
 import CameraFeedPage from './pages/CameraFeedPage'
+import LogsPage from './pages/LogsPage'
+import ProfilePage from './pages/ProfilePage'
 import Footer from './components/Footer'
 import AboutDialog from './components/AboutDialog'
 import LoginPage from './pages/LoginPage'
@@ -227,17 +230,39 @@ function AppInner() {
   return (
     <LogContext.Provider value={logEvent}>
       <BrowserRouter>
-        <AppLayout connectionStatus={connectionStatus} logEvent={logEvent} onOpenAbout={() => setAboutOpen(true)} />
+        <AppLayout userId={user.uid} connectionStatus={connectionStatus} logEvent={logEvent} onOpenAbout={() => setAboutOpen(true)} />
       </BrowserRouter>
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </LogContext.Provider>
   )
 }
 
-function AppLayout({ connectionStatus, logEvent, onOpenAbout }) {
+function AppLayout({ userId, connectionStatus, logEvent, onOpenAbout }) {
   const location = useLocation()
   const prevPathRef = useRef('')
   const [selectedFloorId, setSelectedFloorId] = useState(null)
+  const [seeding, setSeeding] = useState(false)
+  const seededRef = useRef(false)
+
+  useEffect(() => {
+    if (!userId || seededRef.current) return
+    seededRef.current = true
+
+    const checkAndSeed = async () => {
+      try {
+        const snap = await fbGet(ref(db, `users/${userId}/floors`))
+        if (!snap.exists() || Object.keys(snap.val()).length === 0) {
+          setSeeding(true)
+          await seedSampleData(userId)
+          setSeeding(false)
+        }
+      } catch {
+        setSeeding(false)
+      }
+    }
+
+    checkAndSeed()
+  }, [userId])
 
   useEffect(() => {
     const prev = prevPathRef.current
@@ -253,6 +278,18 @@ function AppLayout({ connectionStatus, logEvent, onOpenAbout }) {
     }
   }, [selectedFloorId, logEvent])
 
+  if (seeding) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#0A1628', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+        <CircularProgress size={32} sx={{ color: '#C9A84C' }} />
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{ color: '#E8D5A3', fontFamily: '"Outfit", sans-serif', fontWeight: 600, fontSize: '1.1rem' }}>Setting up your workspace...</Typography>
+          <Typography variant="body2" sx={{ color: '#7C6B8A', mt: 0.5 }}>Seeding sample data for your account</Typography>
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#0A1628' }}>
       <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
@@ -260,14 +297,16 @@ function AppLayout({ connectionStatus, logEvent, onOpenAbout }) {
         <Box sx={{ position: 'absolute', bottom: '-15%', left: '-10%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.03), transparent 60%)', filter: 'blur(100px)', animation: 'float-orb-2 32s ease-in-out infinite' }} />
       </Box>
 
-          <Navbar connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} onLogout={() => auth?.signOut()} />
-      <Sidebar selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
+          <Navbar userId={userId} connectionStatus={connectionStatus} selectedFloorId={selectedFloorId} onLogout={() => auth?.signOut()} />
+      <Sidebar userId={userId} selectedFloorId={selectedFloorId} onFloorSelect={setSelectedFloorId} />
       <Box component="main" sx={{ flexGrow: 1, mt: 9, ml: '252px', p: 4, pb: 2, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Box sx={{ flex: 1 }}>
           <Routes>
-            <Route path="/" element={<FloorOverviewPage selectedFloorId={selectedFloorId} />} />
+            <Route path="/" element={<FloorOverviewPage userId={userId} selectedFloorId={selectedFloorId} />} />
             <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
             <Route path="/camera/:deviceId" element={<CameraFeedPage />} />
+            <Route path="/logs" element={<LogsPage userId={userId} />} />
+            <Route path="/profile" element={<ProfilePage userId={userId} />} />
           </Routes>
         </Box>
         <Footer onAboutClick={onOpenAbout} />

@@ -10,18 +10,18 @@ const C = { gold: '#C9A84C', navy: '#1E3A5F', champagne: '#E8D5A3', platinum: '#
 const iconMap = { home: Home, stairs: Stairs, attic: Roofing, apartment: Home, villa: Home, office: Home }
 const DW = 252, CW = 60
 
-export default function Sidebar({ selectedFloorId, onFloorSelect }) {
+export default function Sidebar({ userId, selectedFloorId, onFloorSelect }) {
   const [collapsed, setCollapsed] = useState(false); const [mounted, setMounted] = useState(false)
   const [addOpen, setAddOpen] = useState(false); const [editOpen, setEditOpen] = useState(false)
   const [editing, setEditing] = useState(null); const [delOpen, setDelOpen] = useState(false)
   const [delId, setDelId] = useState(null); const [menuA, setMenuA] = useState(null); const [menuF, setMenuF] = useState(null)
-  const { floors, loading } = useFloorList()
+  const { floors, loading } = useFloorList(userId)
   useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
   const si = floors.findIndex((f) => f.id === selectedFloorId)
 
-  const handleAdd = async (d) => { await addFloor(d.name, d.icon) }
-  const handleEdit = async (d) => { await updateFloor(editing.id, d); setEditing(null) }
-  const handleDel = async () => { if (delId) { await deleteFloor(delId); if (selectedFloorId === delId) onFloorSelect(null); setDelId(null) } }
+  const handleAdd = async (d) => { await addFloor(userId, d.name, d.icon) }
+  const handleEdit = async (d) => { await updateFloor(userId, editing.id, d); setEditing(null) }
+  const handleDel = async () => { if (delId) { await deleteFloor(userId, delId); if (selectedFloorId === delId) onFloorSelect(null); setDelId(null) } }
 
   return (<>
     <Drawer variant="permanent" sx={{ width: collapsed ? CW : DW, flexShrink: 0, transition: 'width 0.35s cubic-bezier(0.22,0.61,0.36,1)', '& .MuiDrawer-paper': { width: collapsed ? CW : DW, boxSizing: 'border-box', pt: 9, overflowX: 'hidden', transition: 'width 0.35s cubic-bezier(0.22,0.61,0.36,1)' } }}>
