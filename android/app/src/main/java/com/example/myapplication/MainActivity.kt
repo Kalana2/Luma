@@ -57,7 +57,7 @@ fun AppNavigation() {
             SignUpScreen(
                 onBackClick = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    navController.navigate("dashboard") {
+                    navController.navigate("home") {
                         popUpTo("welcome") { inclusive = true }
                     }
                 }

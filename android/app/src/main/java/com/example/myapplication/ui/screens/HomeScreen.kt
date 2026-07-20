@@ -45,7 +45,6 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.pages_controllers.getUserData
 import com.example.myapplication.ui.pages_controllers.model.*
-import com.example.myapplication.ui.screens.HomeGraphDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.io.File
@@ -83,7 +82,6 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
 
     var selectedDeviceId by remember { mutableStateOf<String?>(null) }
     var showLogsDialog by remember { mutableStateOf(false) }
-    var showHomeGraph by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentUser?.uid) {
         val uid = currentUser?.uid ?: run {
@@ -158,14 +156,11 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Luma", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp) },
+                title = { Text("Lumaa", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp) },
                 navigationIcon = {
                     IconButton(onClick = onProfileClick) { UserAvatar(name = userDetails?.name) }
                 },
                 actions = {
-                    IconButton(onClick = { showHomeGraph = true }) {
-                        Icon(Icons.Default.Search, contentDescription = "Home Map")
-                    }
                     IconButton(onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.lumaa.tk"))
                         context.startActivity(intent)
@@ -209,16 +204,61 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
                     )
                 }
 
-                items(groupedDevices, key = { it.first.id }) { (floor, floorDevices) ->
-                    FloorSection(
-                        floorName = floor.name,
-                        devices = floorDevices,
-                        onToggle = { device ->
-                            val newStatus = if (device.isOn) "OFF" else "ON"
-                            database.child("devices").child(device.id).updateChildren(mapOf("status" to newStatus, "state" to newStatus))
-                        },
-                        onDeviceClick = { selectedDeviceId = it.id }
-                    )
+                if (groupedDevices.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.AddCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "No floors or devices added",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = "Please add those from the Web Portal to start controlling your home.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.lumaa.tk"))
+                                        context.startActivity(intent)
+                                    }
+                                ) {
+                                    Text("Go to Web Portal")
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    items(groupedDevices, key = { it.first.id }) { (floor, floorDevices) ->
+                        FloorSection(
+                            floorName = floor.name,
+                            devices = floorDevices,
+                            onToggle = { device ->
+                                val newStatus = if (device.isOn) "OFF" else "ON"
+                                database.child("devices").child(device.id).updateChildren(mapOf("status" to newStatus, "state" to newStatus))
+                            },
+                            onDeviceClick = { selectedDeviceId = it.id }
+                        )
+                    }
                 }
             }
         }
@@ -249,10 +289,6 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
 
     if (showLogsDialog) {
         LogsDialog(logs = logs, onDismiss = { showLogsDialog = false })
-    }
-
-    if (showHomeGraph) {
-        HomeGraphDialog(floors = floors, devices = devices, onDismiss = { showHomeGraph = false })
     }
 }
 
