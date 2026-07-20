@@ -1,5 +1,7 @@
 package com.example.myapplication.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -8,13 +10,17 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
@@ -28,19 +34,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.pages_controllers.getUserData
-import com.example.myapplication.ui.pages_controllers.model.User
-import com.example.myapplication.ui.pages_controllers.model.Floor
-import com.example.myapplication.ui.pages_controllers.model.Device
-import com.example.myapplication.ui.pages_controllers.model.Room
+import com.example.myapplication.ui.pages_controllers.model.*
+import com.example.myapplication.ui.screens.HomeGraphDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 fun getDeviceIcon(type: String): ImageVector {
@@ -70,6 +79,11 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
 
     val floors = remember { mutableStateListOf<Floor>() }
     val devices = remember { mutableStateListOf<Device>() }
+    val logs = remember { mutableStateListOf<UserLog>() }
+
+    var selectedDeviceId by remember { mutableStateOf<String?>(null) }
+    var showLogsDialog by remember { mutableStateOf(false) }
+    var showHomeGraph by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentUser?.uid) {
         val uid = currentUser?.uid ?: run {
@@ -82,47 +96,47 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
         }
 
         // 1. Listen for Floors under the user
-        val floorsRef = database.child("users").child(uid).child("floors")
-        val floorsListener = object : ValueEventListener {
+        database.child("users").child(uid).child("floors").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 floors.clear()
                 snapshot.children.forEach { child ->
                     val floor = child.getValue(Floor::class.java)?.copy(id = child.key ?: "")
-                    if (floor != null) {
-                        floors.add(floor)
-                    }
+                    if (floor != null) floors.add(floor)
                 }
                 isLoading = false
             }
-            override fun onCancelled(error: DatabaseError) {
-                isLoading = false
-            }
-        }
-        floorsRef.addValueEventListener(floorsListener)
+            override fun onCancelled(error: DatabaseError) { isLoading = false }
+        })
 
-        // 2. Listen for all Devices for this user
-        val devicesRef = database.child("devices")
-        val devicesListener = object : ValueEventListener {
+        // 2. Listen for Devices for this user
+        database.child("devices").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 devices.clear()
                 snapshot.children.forEach { child ->
                     val device = child.getValue(Device::class.java)?.copy(id = child.key ?: "")
-                    if (device != null && device.userId == uid) {
-                        devices.add(device)
-                    }
+                    if (device != null && device.userId == uid) devices.add(device)
                 }
             }
             override fun onCancelled(error: DatabaseError) {}
-        }
-        devicesRef.addValueEventListener(devicesListener)
+        })
+
+        // 3. Listen for Logs (Reporting)
+        database.child("userLogs").child(uid).limitToLast(20).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                logs.clear()
+                snapshot.children.forEach { child ->
+                    val log = child.getValue(UserLog::class.java)
+                    if (log != null) logs.add(log)
+                }
+                logs.reverse() // Most recent first
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
-    // Mapping floors to their devices based on room associations
     val groupedDevices = remember(floors.toList(), devices.toList()) {
         floors.map { floor ->
-            // Collect all device IDs mentioned in this floor's rooms
             val floorDeviceIds = floor.rooms.values.flatMap { it.devices.keys }.toSet()
-            // Filter devices that belong to this floor
             floor to devices.filter { it.id in floorDeviceIds }
         }
     }
@@ -139,46 +153,41 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
 
     val totalDevices = devices.size
     val activeDevices = devices.count { it.isOn }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Luma",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp
-                    )
-                },
+                title = { Text("Luma", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp) },
                 navigationIcon = {
-                    IconButton(onClick = onProfileClick) {
-                        UserAvatar(name = userDetails?.name)
-                    }
+                    IconButton(onClick = onProfileClick) { UserAvatar(name = userDetails?.name) }
                 },
                 actions = {
-                    IconButton(onClick = { /* Sync logic */ }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Sync")
+                    IconButton(onClick = { showHomeGraph = true }) {
+                        Icon(Icons.Default.Search, contentDescription = "Home Map")
+                    }
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.lumaa.tk"))
+                        context.startActivity(intent)
+                    }) {
+                        Icon(Icons.Default.Share, contentDescription = "Web Portal")
+                    }
+                    IconButton(onClick = { showLogsDialog = true }) {
+                        Icon(Icons.Default.List, contentDescription = "Reports")
                     }
                     IconButton(onClick = onLogout) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { paddingValues ->
         if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
             ) {
@@ -194,7 +203,7 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
 
                 item {
                     Text(
-                        text = "My Devices",
+                        text = "Smart Dashboard",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -206,13 +215,44 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
                         devices = floorDevices,
                         onToggle = { device ->
                             val newStatus = if (device.isOn) "OFF" else "ON"
-                            database.child("devices").child(device.id).child("status").setValue(newStatus)
-                            database.child("devices").child(device.id).child("state").setValue(newStatus)
-                        }
+                            database.child("devices").child(device.id).updateChildren(mapOf("status" to newStatus, "state" to newStatus))
+                        },
+                        onDeviceClick = { selectedDeviceId = it.id }
                     )
                 }
             }
         }
+    }
+
+    selectedDeviceId?.let { deviceId ->
+        val device = devices.find { it.id == deviceId }
+        if (device != null) {
+            DeviceDetailDialog(
+                device = device,
+                onDismiss = { selectedDeviceId = null },
+                onToggle = { dev, newStatus ->
+                    database.child("devices").child(dev.id).updateChildren(mapOf("status" to newStatus, "state" to newStatus))
+                },
+                onToggleSwitch = { dev, switchId, newStatus ->
+                    database.child("devices").child(dev.id).child("switches").child(switchId).setValue(newStatus)
+                },
+                onUpdateSchedule = { dev, start, end, maxDur ->
+                    val updates = mutableMapOf<String, Any?>()
+                    updates["startTime"] = start
+                    updates["endTime"] = end
+                    updates["maxDurationMinutes"] = maxDur
+                    database.child("devices").child(dev.id).updateChildren(updates)
+                }
+            )
+        }
+    }
+
+    if (showLogsDialog) {
+        LogsDialog(logs = logs, onDismiss = { showLogsDialog = false })
+    }
+
+    if (showHomeGraph) {
+        HomeGraphDialog(floors = floors, devices = devices, onDismiss = { showHomeGraph = false })
     }
 }
 
@@ -354,7 +394,8 @@ fun StatDivider() {
 fun FloorSection(
     floorName: String,
     devices: List<Device>,
-    onToggle: (Device) -> Unit
+    onToggle: (Device) -> Unit,
+    onDeviceClick: (Device) -> Unit
 ) {
     var expanded by remember { mutableStateOf(true) }
     val activeCount = devices.count { it.isOn }
@@ -396,7 +437,11 @@ fun FloorSection(
                     Spacer(modifier = Modifier.height(12.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(devices, key = { it.id }) { device ->
-                            DeviceCard(device = device, onToggle = { onToggle(device) })
+                            DeviceCard(
+                                device = device,
+                                onToggle = { onToggle(device) },
+                                onClick = { onDeviceClick(device) }
+                            )
                         }
                     }
                 }
@@ -406,49 +451,66 @@ fun FloorSection(
 }
 
 @Composable
-fun DeviceCard(device: Device, onToggle: () -> Unit) {
+fun DeviceCard(device: Device, onToggle: () -> Unit, onClick: () -> Unit) {
     val containerColor by animateColorAsState(
-        targetValue = if (device.isOn)
-            MaterialTheme.colorScheme.primaryContainer
-        else
-            MaterialTheme.colorScheme.surface,
+        targetValue = when {
+            device.isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f)
+            device.isDisconnected -> MaterialTheme.colorScheme.surfaceVariant
+            device.isOn -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        },
         animationSpec = tween(250),
         label = "deviceContainerColor"
     )
     val iconColor by animateColorAsState(
-        targetValue = if (device.isOn) MaterialTheme.colorScheme.primary else Color.Gray,
+        targetValue = when {
+            device.isError -> MaterialTheme.colorScheme.error
+            device.isDisconnected -> Color.Gray
+            device.isOn -> MaterialTheme.colorScheme.primary
+            else -> Color.Gray
+        },
         animationSpec = tween(250),
         label = "deviceIconColor"
     )
-    val scale by animateFloatAsState(
-        targetValue = if (device.isOn) 1f else 0.96f,
-        animationSpec = tween(200),
-        label = "deviceScale"
-    )
-
+    
     Card(
-        modifier = Modifier
-            .width(108.dp)
-            .height(112.dp),
+        modifier = Modifier.width(110.dp).height(120.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = if (device.isOn) 4.dp else 0.dp),
-        onClick = onToggle
+        onClick = if (device.isDisconnected) ({}) else onClick
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // Status Dot or Quick Toggle
             Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(if (device.isOn) Color(0xFF4CAF50) else Color.Transparent)
-            )
+                modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+            ) {
+                if (device.type != "camera" && device.type != "switchPanel" && !device.isDisconnected) {
+                    Switch(
+                        checked = device.isOn,
+                        onCheckedChange = { onToggle() },
+                        modifier = Modifier.scale(0.6f),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.padding(4.dp).size(8.dp).clip(CircleShape).background(
+                            when {
+                                device.isError -> Color.Red
+                                device.isDisconnected -> Color.Gray
+                                device.isOn -> Color(0xFF4CAF50)
+                                else -> Color.Transparent
+                            }
+                        )
+                    )
+                }
+            }
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxSize().padding(10.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -456,7 +518,7 @@ fun DeviceCard(device: Device, onToggle: () -> Unit) {
                     imageVector = getDeviceIcon(device.type),
                     contentDescription = device.name,
                     tint = iconColor,
-                    modifier = Modifier.size((28 * scale).dp)
+                    modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -464,9 +526,184 @@ fun DeviceCard(device: Device, onToggle: () -> Unit) {
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 2,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (device.isDisconnected) {
+                    Text("Offline", fontSize = 8.sp, color = Color.Gray)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeviceDetailDialog(
+    device: Device,
+    onDismiss: () -> Unit,
+    onToggle: (Device, String) -> Unit,
+    onToggleSwitch: (Device, String, String) -> Unit,
+    onUpdateSchedule: (Device, String?, String?, Int?) -> Unit
+) {
+    var startTime by remember(device) { mutableStateOf(device.startTime ?: "") }
+    var endTime by remember(device) { mutableStateOf(device.endTime ?: "") }
+    var maxDur by remember(device) { mutableStateOf(device.maxDurationMinutes?.toString() ?: "") }
+    var showScheduleEditor by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState())) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(getDeviceIcon(device.type), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = device.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Camera Preview
+                if (device.type == "camera" && device.lastSnapshotUrl != null) {
+                    AsyncImage(
+                        model = device.lastSnapshotUrl,
+                        contentDescription = "Camera View",
+                        modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Main Toggle or Multi-Switches
+                if (device.type == "switchPanel" && device.switches != null) {
+                    Text("Switches", style = MaterialTheme.typography.titleMedium)
+                    device.switches.forEach { (sid, sstate) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(sid.replaceFirstChar { it.uppercase() })
+                            Switch(
+                                checked = sstate == "ON",
+                                onCheckedChange = { onToggleSwitch(device, sid, if (it) "ON" else "OFF") }
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Power", style = MaterialTheme.typography.titleMedium)
+                        Switch(
+                            checked = device.isOn,
+                            onCheckedChange = { onToggle(device, if (it) "ON" else "OFF") }
+                        )
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Safety & Scheduling", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                    IconButton(onClick = { showScheduleEditor = !showScheduleEditor }) {
+                        Icon(if (showScheduleEditor) Icons.Default.Close else Icons.Default.Edit, contentDescription = "Edit Schedule", modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                if (showScheduleEditor) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = startTime,
+                            onValueChange = { startTime = it },
+                            label = { Text("Start Time (HH:mm)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = endTime,
+                            onValueChange = { endTime = it },
+                            label = { Text("End Time (HH:mm)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = maxDur,
+                            onValueChange = { maxDur = it },
+                            label = { Text("Max On Duration (min)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Button(
+                            onClick = {
+                                onUpdateSchedule(device, startTime.ifBlank { null }, endTime.ifBlank { null }, maxDur.toIntOrNull())
+                                showScheduleEditor = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save Schedule")
+                        }
+                    }
+                } else {
+                    if (device.startTime != null) {
+                        InfoRow(label = "Active Hours", value = "${device.startTime} - ${device.endTime}")
+                    }
+                    if (device.maxDurationMinutes != null) {
+                        InfoRow(label = "Safety Cutoff", value = "${device.maxDurationMinutes} min max")
+                    }
+                    if (device.startTime == null && device.maxDurationMinutes == null) {
+                        Text("No schedule set", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(text = label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        Text(text = value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun LogsDialog(logs: List<UserLog>, onDismiss: () -> Unit) {
+    val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.7f).padding(16.dp),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text("Device Usage Reports", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(logs) { log ->
+                        Column {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                Text(log.event.replace("_", " ").uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                                Text(sdf.format(Date(log.timestamp)), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                            }
+                            Text(log.device, fontWeight = FontWeight.Medium)
+                            if (log.details.isNotEmpty()) {
+                                Text(log.details.toString(), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(top = 8.dp), thickness = 0.5.dp)
+                        }
+                    }
+                }
             }
         }
     }
