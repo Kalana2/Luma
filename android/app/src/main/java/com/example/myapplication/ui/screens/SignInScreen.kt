@@ -24,6 +24,7 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
     Scaffold(

@@ -24,19 +24,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.ui.pages_controllers.model.Floor
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.coroutines.launch
 import java.util.*
-
-data class Floor(
-    val id: String = "",
-    val name: String = "",
-    val iconName: String = "Home",
-    val roomCount: Int = 0,
-    val activeDevices: Int = 0,
-    val isOn: Boolean = false
-)
 
 private val LumaPrimary = Color(0xFF7B88FF)
 private val LumaBackground = Color(0xFFF5F7FB)
@@ -312,12 +304,12 @@ fun DashboardScreen(
                     val floorsRef = database.child("users").child(userId).child("floors")
                     if (floorToEdit == null) {
                         val newFloorRef = floorsRef.push()
-                        val newFloor = Floor(id = newFloorRef.key ?: "", name = name, iconName = icon)
+                        val newFloor = Floor(id = newFloorRef.key ?: "", name = name, icon = icon)
                         newFloorRef.setValue(newFloor)
                     } else {
                         floorsRef.child(floorToEdit!!.id).updateChildren(mapOf(
                             "name" to name,
-                            "iconName" to icon
+                            "icon" to icon
                         ))
                     }
                 }
@@ -367,7 +359,7 @@ fun FloorCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = getIconForName(floor.iconName),
+                        imageVector = getIconForName(floor.icon),
                         contentDescription = null,
                         modifier = Modifier.size(28.dp),
                         tint = if (floor.isOn) LumaPrimary else Color.DarkGray
@@ -395,7 +387,7 @@ fun FloorCard(
                     color = Color.Black
                 )
                 Text(
-                    text = if (floor.roomCount > 0) "Floor description here" else "Smart Device",
+                    text = if (floor.rooms.isNotEmpty()) "${floor.rooms.size} Rooms" else "Smart Device",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -412,7 +404,7 @@ fun FloorDialog(
     onDelete: () -> Unit = {}
 ) {
     var name by remember { mutableStateOf(floor?.name ?: "") }
-    var selectedIcon by remember { mutableStateOf(floor?.iconName ?: "Home") }
+    var selectedIcon by remember { mutableStateOf(floor?.icon ?: "home") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -428,7 +420,7 @@ fun FloorDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Select Icon")
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    listOf("Home", "Info", "Settings", "List").forEach { iconName ->
+                    listOf("home", "stairs", "attic").forEach { iconName ->
                         IconButton(onClick = { selectedIcon = iconName }) {
                             Icon(
                                 imageVector = getIconForName(iconName),
@@ -470,11 +462,10 @@ fun getGreeting(): String {
 }
 
 fun getIconForName(name: String): ImageVector {
-    return when (name) {
-        "Home" -> Icons.Default.Home
-        "Info" -> Icons.Default.Info
-        "Settings" -> Icons.Default.Settings
-        "List" -> Icons.Default.List
+    return when (name.lowercase()) {
+        "home" -> Icons.Default.Home
+        "stairs" -> Icons.Default.List
+        "attic" -> Icons.Default.Build
         else -> Icons.Default.Home
     }
 }

@@ -1,0 +1,381 @@
+{
+  "devices": {
+    "device-001": {
+      "endTime": "23:00",
+      "lastSeen": 1784529035105,
+      "name": "Living Room Light",
+      "startTime": "18:00",
+      "state": "OFF",
+      "status": "OFF",
+      "type": "light",
+      "userId": "rwjSVaI5HDhV5DmVT3JxY8zV6um2"
+    },
+    "device-002": {
+      "lastSeen": 1784529035105,
+      "name": "Kitchen Outlet",
+      "state": "OFF",
+      "status": "OFF",
+      "type": "outlet",
+      "userId": "rwjSVaI5HDhV5DmVT3JxY8zV6um2"
+    },
+    "device-003": {
+      "lastSeen": 1784529035105,
+      "maxDurationMinutes": 30,
+      "name": "Bedroom Iron",
+      "state": "OFF",
+      "status": "OFF",
+      "type": "iron",
+      "userId": "rwjSVaI5HDhV5DmVT3JxY8zV6um2"
+    },
+    "device-004": {
+      "lastSeen": 1784529035105,
+      "name": "Study Switch Panel",
+      "status": "OFF",
+      "switchCount": 3,
+      "switches": {
+        "switch1": "OFF",
+        "switch2": "OFF",
+        "switch3": "OFF"
+      },
+      "type": "switchPanel",
+      "userId": "rwjSVaI5HDhV5DmVT3JxY8zV6um2"
+    },
+    "device-005": {
+      "lastSeen": 1784529035105,
+      "lastSnapshotAt": 1784529035105,
+      "lastSnapshotUrl": "https://picsum.photos/seed/camera-garage/640/480",
+      "name": "Garage Camera",
+      "status": "ONLINE",
+      "type": "camera",
+      "userId": "rwjSVaI5HDhV5DmVT3JxY8zV6um2"
+    }
+  },
+  "floors": {
+    "floor-001": {
+      "icon": "home",
+      "name": "Ground Floor",
+      "rooms": {
+        "room-001": {
+          "devices": {
+            "device-001": true
+          },
+          "name": "Living Room"
+        },
+        "room-002": {
+          "devices": {
+            "device-002": true
+          },
+          "name": "Kitchen"
+        }
+      }
+    },
+    "floor-002": {
+      "icon": "stairs",
+      "name": "First Floor",
+      "rooms": {
+        "room-003": {
+          "devices": {
+            "device-003": true
+          },
+          "name": "Master Bedroom"
+        },
+        "room-004": {
+          "devices": {
+            "device-004": true
+          },
+          "name": "Study"
+        }
+      }
+    },
+    "floor-003": {
+      "icon": "attic",
+      "name": "Second Floor",
+      "rooms": {
+        "room-005": {
+          "devices": {
+            "device-005": true
+          },
+          "name": "Garage"
+        }
+      }
+    }
+  },
+  "userLogs": {
+    "luXkxTgCNXPskM5AbLCF3VZ4Axv2": {
+      "-OxjLaHjgalNvpM0IbbM": {
+        "details": {
+          "floorId": "floor-001"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784279623160
+      },
+      "-OxjLaljjICZURHVwmVJ": {
+        "details": {
+          "floorId": "floor-002"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784279625143
+      },
+      "-OxjLbBnUcf76TwJBZwX": {
+        "details": {
+          "floorId": "floor-003"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784279626875
+      },
+      "-OxjLbwHBfaBzvUftvmg": {
+        "details": {
+          "floorId": "floor-001"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784279629914
+      },
+      "-OxjLfpJuF44raKhrEXd": {
+        "details": {
+          "floorId": "floor-002"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784279645853
+      }
+    },
+    "rwjSVaI5HDhV5DmVT3JxY8zV6um2": {
+      "-OxyCu0vyuDmOBEBaR5u": {
+        "details": {
+          "floorId": "floor-001",
+          "floorName": "Home"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "dashboard_view",
+        "timestamp": 1784529002620
+      },
+      "-OxyCu0yE0YnXkaz4uy6": {
+        "details": {
+          "floorId": "floor-001"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784529002623
+      },
+      "-OxyD13b-C4AOzX_SNo1": {
+        "details": {
+          "floorId": "floor-001",
+          "floorName": "Ground Floor"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "dashboard_view",
+        "timestamp": 1784529035560
+      },
+      "-OxyD4QaCbXIaJgSFppj": {
+        "details": {
+          "floorId": "floor-002",
+          "floorName": "First Floor"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "dashboard_view",
+        "timestamp": 1784529049319
+      },
+      "-OxyD4QdhmOwDByrM8Lg": {
+        "details": {
+          "floorId": "floor-002"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784529049322
+      },
+      "-OxyD58SuOU9J6wBkPZ6": {
+        "details": {
+          "floorId": "floor-001",
+          "floorName": "Ground Floor"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "dashboard_view",
+        "timestamp": 1784529052254
+      },
+      "-OxyD58U6NNVs01RObj4": {
+        "details": {
+          "floorId": "floor-001"
+        },
+        "device": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+        "environment": "simulator",
+        "event": "floor_select",
+        "timestamp": 1784529052256
+      }
+    }
+  },
+  "users": {
+    "6BF9NqQ8E1RoEADvJwbxumKmAGa2": {
+      "address": "Athurugiriya",
+      "email": "bihansa123@gmail.com",
+      "id": "6BF9NqQ8E1RoEADvJwbxumKmAGa2",
+      "name": "Bihansa Gona",
+      "phone": "0789765636",
+      "role": "User"
+    },
+    "6UJk2dqSzUZpUhu7pw5d8WI0pdi1": {
+      "address": "keggale",
+      "email": "test123a@gmail.com",
+      "id": "6UJk2dqSzUZpUhu7pw5d8WI0pdi1",
+      "name": "test",
+      "phone": "0711873101",
+      "role": "User"
+    },
+    "9eZUZroag5VTc6lEs7skpkcQNrH3": {
+      "address": "kegalle",
+      "email": "sahangajanayake451@gmail.com",
+      "id": "9eZUZroag5VTc6lEs7skpkcQNrH3",
+      "name": "Sahana Gajanayake",
+      "phone": "0711873101",
+      "role": "User"
+    },
+    "Dmc7r20qt0WNSkhN0eL3WiqnMUx2": {
+      "address": "Kegalle",
+      "email": "pjict@gmail.com",
+      "floors": {
+        "-OxHIE2K-moETALZPO2w": {
+          "activeDevices": 0,
+          "iconName": "Home",
+          "id": "-OxHIE2K-moETALZPO2w",
+          "name": "1st floor",
+          "roomCount": 0
+        }
+      },
+      "id": "Dmc7r20qt0WNSkhN0eL3WiqnMUx2",
+      "name": "Pramod Janitha",
+      "phone": "0789765252",
+      "role": "User"
+    },
+    "HHqAANHXPLMo83oTXrNCG9VOeFL2": {
+      "address": "Colombo",
+      "email": "chathu123@gmail.com",
+      "floors": {
+        "-OxHJmDHUg8wlFwGzNyZ": {
+          "activeDevices": 0,
+          "iconName": "Home",
+          "id": "-OxHJmDHUg8wlFwGzNyZ",
+          "name": "1st floor",
+          "roomCount": 0
+        }
+      },
+      "id": "HHqAANHXPLMo83oTXrNCG9VOeFL2",
+      "name": "Chathura Alwis",
+      "phone": "0712327373",
+      "role": "User"
+    },
+    "NGR9vsFjVrdlYvI3CkGpYfQzS0v2": {
+      "address": "Badulla",
+      "email": "kala123@gmail.com",
+      "id": "NGR9vsFjVrdlYvI3CkGpYfQzS0v2",
+      "name": "Kalana Jinendra",
+      "phone": "0788014587",
+      "role": "User"
+    },
+    "lQqYQ2lKcjdNqAGZE94zAmxUism2": {
+      "address": "Gamoaha",
+      "email": "a@gmail.com",
+      "floors": {
+        "-OxHM31dUJZO56gx71Ki": {
+          "activeDevices": 0,
+          "iconName": "Home",
+          "id": "-OxHM31dUJZO56gx71Ki",
+          "isOn": true,
+          "name": "1st floor ",
+          "on": false,
+          "roomCount": 0
+        }
+      },
+      "id": "lQqYQ2lKcjdNqAGZE94zAmxUism2",
+      "name": "Wasantha",
+      "phone": "0711873101",
+      "role": "User"
+    },
+    "rwjSVaI5HDhV5DmVT3JxY8zV6um2": {
+      "address": "Kegalle",
+      "devices": {
+        "device-001": true,
+        "device-002": true,
+        "device-003": true,
+        "device-004": true,
+        "device-005": true
+      },
+      "email": "kavinduSahan123@gmail.com",
+      "floors": {
+        "floor-001": {
+          "icon": "home",
+          "name": "Ground Floor",
+          "rooms": {
+            "room-001": {
+              "devices": {
+                "device-001": true
+              },
+              "name": "Living Room"
+            },
+            "room-002": {
+              "devices": {
+                "device-002": true
+              },
+              "name": "Kitchen"
+            }
+          }
+        },
+        "floor-002": {
+          "icon": "stairs",
+          "name": "First Floor",
+          "rooms": {
+            "room-003": {
+              "devices": {
+                "device-003": true
+              },
+              "name": "Master Bedroom"
+            },
+            "room-004": {
+              "devices": {
+                "device-004": true
+              },
+              "name": "Study"
+            }
+          }
+        },
+        "floor-003": {
+          "icon": "attic",
+          "name": "Second Floor",
+          "rooms": {
+            "room-005": {
+              "devices": {
+                "device-005": true
+              },
+              "name": "Garage"
+            }
+          }
+        }
+      },
+      "id": "rwjSVaI5HDhV5DmVT3JxY8zV6um2",
+      "name": "Chamod Kavindu",
+      "phone": "0718712987",
+      "role": "User"
+    },
+    "vV05uLiVAqUTOTmLi6u3lDeut5l1": {
+      "address": "kegalle",
+      "email": "sewmini@gmail.com",
+      "id": "vV05uLiVAqUTOTmLi6u3lDeut5l1",
+      "name": "hakmana Katu",
+      "phone": "0784852147",
+      "role": "User"
+    }
+  }
+}

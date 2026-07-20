@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,33 +35,96 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.myapplication.ui.pages_controllers.getUserData
 import com.example.myapplication.ui.pages_controllers.model.User
+import com.example.myapplication.ui.pages_controllers.model.Floor
+import com.example.myapplication.ui.pages_controllers.model.Device
+import com.example.myapplication.ui.pages_controllers.model.Room
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import java.io.File
 import java.util.*
 
-// ---------- Data model for a device ----------
-data class Device(
-    val id: String,
-    val name: String,
-    val icon: ImageVector,
-    var isOn: Boolean = false
-)
+fun getDeviceIcon(type: String): ImageVector {
+    return when (type.lowercase()) {
+        "light" -> Icons.Default.Star
+        "lock" -> Icons.Default.Lock
+        "ac" -> Icons.Default.Settings
+        "fan" -> Icons.Default.Refresh
+        "plug", "outlet" -> Icons.Default.Settings
+        "iron" -> Icons.Default.Warning
+        "camera" -> Icons.Default.CheckCircle
+        "switchpanel" -> Icons.Default.List
+        else -> Icons.Default.Star
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
+    val dbUrl = "https://lumaa-2590d-default-rtdb.asia-southeast1.firebasedatabase.app"
+    val database = FirebaseDatabase.getInstance(dbUrl).reference
+    
     var userDetails by remember { mutableStateOf<User?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
+    val floors = remember { mutableStateListOf<Floor>() }
+    val devices = remember { mutableStateListOf<Device>() }
+
     LaunchedEffect(currentUser?.uid) {
-        currentUser?.uid?.let { uid ->
-            getUserData(uid) { user ->
-                userDetails = user
+        val uid = currentUser?.uid ?: run {
+            isLoading = false
+            return@LaunchedEffect
+        }
+
+        getUserData(uid) { user ->
+            userDetails = user
+        }
+
+        // 1. Listen for Floors under the user
+        val floorsRef = database.child("users").child(uid).child("floors")
+        val floorsListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                floors.clear()
+                snapshot.children.forEach { child ->
+                    val floor = child.getValue(Floor::class.java)?.copy(id = child.key ?: "")
+                    if (floor != null) {
+                        floors.add(floor)
+                    }
+                }
                 isLoading = false
             }
-        } ?: run { isLoading = false }
+            override fun onCancelled(error: DatabaseError) {
+                isLoading = false
+            }
+        }
+        floorsRef.addValueEventListener(floorsListener)
+
+        // 2. Listen for all Devices for this user
+        val devicesRef = database.child("devices")
+        val devicesListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                devices.clear()
+                snapshot.children.forEach { child ->
+                    val device = child.getValue(Device::class.java)?.copy(id = child.key ?: "")
+                    if (device != null && device.userId == uid) {
+                        devices.add(device)
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        devicesRef.addValueEventListener(devicesListener)
+    }
+
+    // Mapping floors to their devices based on room associations
+    val groupedDevices = remember(floors.toList(), devices.toList()) {
+        floors.map { floor ->
+            // Collect all device IDs mentioned in this floor's rooms
+            val floorDeviceIds = floor.rooms.values.flatMap { it.devices.keys }.toSet()
+            // Filter devices that belong to this floor
+            floor to devices.filter { it.id in floorDeviceIds }
+        }
     }
 
     val hour = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
@@ -68,32 +132,13 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
         when (hour) {
             in 0..11 -> "Good Morning" to "☀️"
             in 12..16 -> "Good Afternoon" to "🌤️"
-            in 17..20 -> "Good Evening" to "🌇"
+            in 17..24 -> "Good Evening" to "🌙"
             else -> "Good Night" to "🌙"
         }
     }
 
-    // Mock per-floor device state with icons available in Icons.Default
-    val floors = remember {
-        mutableStateListOf(
-            "Ground Floor" to mutableStateListOf(
-                Device("gf1", "Living Room Light", Icons.Default.Star, true),
-                Device("gf2", "Main Door Lock", Icons.Default.Lock, true),
-                Device("gf3", "AC", Icons.Default.Settings, false),
-            ),
-            "First Floor" to mutableStateListOf(
-                Device("f1", "Bedroom Light", Icons.Default.Star, false),
-                Device("f2", "Fan", Icons.Default.Refresh, true),
-            ),
-            "Second Floor" to mutableStateListOf(
-                Device("s1", "Study Light", Icons.Default.Star, false),
-                Device("s2", "Smart Plug", Icons.Default.Settings, false),
-            ),
-        )
-    }
-
-    val totalDevices = floors.sumOf { it.second.size }
-    val activeDevices = floors.sumOf { floor -> floor.second.count { it.isOn } }
+    val totalDevices = devices.size
+    val activeDevices = devices.count { it.isOn }
 
     Scaffold(
         topBar = {
@@ -155,13 +200,14 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
                     )
                 }
 
-                items(floors, key = { it.first }) { (floorName, devices) ->
+                items(groupedDevices, key = { it.first.id }) { (floor, floorDevices) ->
                     FloorSection(
-                        floorName = floorName,
-                        devices = devices,
+                        floorName = floor.name,
+                        devices = floorDevices,
                         onToggle = { device ->
-                            val idx = devices.indexOfFirst { it.id == device.id }
-                            if (idx != -1) devices[idx] = devices[idx].copy(isOn = !devices[idx].isOn)
+                            val newStatus = if (device.isOn) "OFF" else "ON"
+                            database.child("devices").child(device.id).child("status").setValue(newStatus)
+                            database.child("devices").child(device.id).child("state").setValue(newStatus)
                         }
                     )
                 }
@@ -407,7 +453,7 @@ fun DeviceCard(device: Device, onToggle: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = device.icon,
+                    imageVector = getDeviceIcon(device.type),
                     contentDescription = device.name,
                     tint = iconColor,
                     modifier = Modifier.size((28 * scale).dp)
