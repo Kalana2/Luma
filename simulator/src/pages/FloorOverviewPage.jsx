@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogContext } from '../contexts/LogContext'
 import {
   Box,
   Typography,
@@ -17,6 +16,7 @@ import {
   addRoom,
   deleteRoom,
   addDevice,
+  deleteDevice,
 } from '../firebase/deviceService'
 import useFloorList from '../hooks/useFloorList'
 import DeviceCard from '../components/DeviceCard'
@@ -27,6 +27,7 @@ import {
   Home,
   Stairs,
   Roofing,
+  Layers,
   Settings,
   Add,
   Delete,
@@ -73,6 +74,9 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
   const [addDeviceOpen, setAddDeviceOpen] = useState(false)
   const [deleteRoomOpen, setDeleteRoomOpen] = useState(false)
   const [deletingRoomId, setDeletingRoomId] = useState(null)
+  const [deleteDeviceOpen, setDeleteDeviceOpen] = useState(false)
+  const [deletingDeviceId, setDeletingDeviceId] = useState(null)
+  const [deletingDeviceRoomId, setDeletingDeviceRoomId] = useState(null)
   const [collapsedRooms, setCollapsedRooms] = useState({})
 
   const floor = floors.find((f) => f.id === selectedFloorId)
@@ -138,16 +142,7 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
     return () => unsubs.forEach((u) => u())
   }, [selectedFloorId, userId])
 
-  const logEvent = useContext(LogContext)
-
-  useEffect(() => {
-    if (selectedFloorId && floor) {
-      logEvent('dashboard_view', { floorId: selectedFloorId, floorName: floor.name })
-    }
-  }, [selectedFloorId, floor?.name])
-
   const handleToggle = async (deviceId, state) => {
-    logEvent('device_toggle', { deviceId, state, floorId: selectedFloorId })
     await setDeviceState(deviceId, state)
   }
 
@@ -184,6 +179,14 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
     }
   }
 
+  const handleDeleteDevice = async () => {
+    if (deletingDeviceId && selectedFloorId) {
+      await deleteDevice(userId, deletingDeviceId, selectedFloorId, deletingDeviceRoomId)
+      setDeletingDeviceId(null)
+      setDeletingDeviceRoomId(null)
+    }
+  }
+
   const toggleRoomCollapse = (roomId) => {
     setCollapsedRooms((prev) => ({ ...prev, [roomId]: !prev[roomId] }))
   }
@@ -196,20 +199,39 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
   const allRooms = floorData?.rooms || {}
 
   if (!selectedFloorId) {
+    if (floors.length === 0 && !floorsLoading) {
+      return (
+        <Box className="page-enter" sx={{ textAlign: 'center', pt: 12 }}>
+          <Box
+            sx={{
+              width: 64, height: 64, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              bgcolor: alpha(C.navy, 0.08),
+              border: `1px solid ${alpha(C.gold, 0.1)}`,
+              mx: 'auto', mb: 3,
+            }}
+          >
+            <Layers sx={{ fontSize: 28, color: C.muted }} />
+          </Box>
+          <Typography variant="h5" sx={{ color: C.champagne, fontWeight: 500 }}>
+            No floors yet
+          </Typography>
+          <Typography variant="body2" sx={{ color: C.muted, maxWidth: 360, mx: 'auto', mb: 3 }}>
+            Get started by adding a floor using the <strong>Add Floor</strong> button in the sidebar,
+            or click <strong>Seed Data</strong> in the navbar to load sample data.
+          </Typography>
+        </Box>
+      )
+    }
     return (
       <Box className="page-enter" sx={{ textAlign: 'center', pt: 12 }}>
         <Box
           sx={{
-            width: 64,
-            height: 64,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: 64, height: 64, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             bgcolor: alpha(C.navy, 0.08),
             border: `1px solid ${alpha(C.gold, 0.1)}`,
-            mx: 'auto',
-            mb: 3,
+            mx: 'auto', mb: 3,
           }}
         >
           <Settings sx={{ fontSize: 28, color: C.muted }} />
@@ -443,6 +465,7 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                           device={device}
                           onToggle={handleToggle}
                           onViewDetails={handleViewDetails}
+                          onDelete={() => { setDeletingDeviceId(device.id); setDeletingDeviceRoomId(roomId); setDeleteDeviceOpen(true) }}
                           style={{
                             animationDelay: `${(roomIdx * 3 + idx) * 0.06}s`,
                           }}
@@ -466,6 +489,14 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
         title="Delete Room"
         message="This will delete this room and all devices inside it."
         confirmLabel="Delete Room"
+      />
+      <ConfirmDialog
+        open={deleteDeviceOpen}
+        onClose={() => { setDeleteDeviceOpen(false); setDeletingDeviceId(null); setDeletingDeviceRoomId(null) }}
+        onConfirm={handleDeleteDevice}
+        title="Delete Device"
+        message="This will permanently delete this device."
+        confirmLabel="Delete Device"
       />
     </Box>
   )

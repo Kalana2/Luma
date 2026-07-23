@@ -7,6 +7,7 @@ import { LogContext } from './contexts/LogContext'
 import { seedSampleData } from './firebase/deviceService'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
+import useFloorList from './hooks/useFloorList'
 import FloorOverviewPage from './pages/FloorOverviewPage'
 import DeviceDetailPage from './pages/DeviceDetailPage'
 import CameraFeedPage from './pages/CameraFeedPage'
@@ -14,6 +15,7 @@ import LogsPage from './pages/LogsPage'
 import ProfilePage from './pages/ProfilePage'
 import Footer from './components/Footer'
 import AboutDialog from './components/AboutDialog'
+import ErrorBoundary from './components/ErrorBoundary'
 import LoginPage from './pages/LoginPage'
 
 const royalTheme = createTheme({
@@ -192,7 +194,6 @@ function AppInner() {
 
   useEffect(() => {
     if (!auth) { setConnectionStatus('error'); setInitializing(false); return }
-    auth.signOut().catch(() => {})
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setConnectionStatus(u ? 'connected' : 'error')
@@ -228,12 +229,14 @@ function AppInner() {
   }
 
   return (
-    <LogContext.Provider value={logEvent}>
-      <BrowserRouter>
-        <AppLayout userId={user.uid} connectionStatus={connectionStatus} logEvent={logEvent} onOpenAbout={() => setAboutOpen(true)} />
-      </BrowserRouter>
-      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
-    </LogContext.Provider>
+    <ErrorBoundary>
+      <LogContext.Provider value={logEvent}>
+        <BrowserRouter>
+          <AppLayout userId={user.uid} connectionStatus={connectionStatus} logEvent={logEvent} onOpenAbout={() => setAboutOpen(true)} />
+        </BrowserRouter>
+        <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      </LogContext.Provider>
+    </ErrorBoundary>
   )
 }
 
@@ -243,6 +246,13 @@ function AppLayout({ userId, connectionStatus, logEvent, onOpenAbout }) {
   const [selectedFloorId, setSelectedFloorId] = useState(null)
   const [seeding, setSeeding] = useState(false)
   const seededRef = useRef(false)
+  const { floors } = useFloorList(userId)
+
+  useEffect(() => {
+    if (floors.length > 0 && !selectedFloorId) {
+      setSelectedFloorId(floors[0].id)
+    }
+  }, [floors, selectedFloorId])
 
   useEffect(() => {
     if (!userId || seededRef.current) return

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Typography, Box, IconButton, Tooltip, Skeleton, Menu, MenuItem, alpha } from '@mui/material'
 import { Home, Stairs, Roofing, ChevronLeft, Menu as MenuIcon, Layers, Add, MoreVert, Edit, Delete } from '@mui/icons-material'
 import useFloorList from '../hooks/useFloorList'
@@ -11,6 +12,7 @@ const iconMap = { home: Home, stairs: Stairs, attic: Roofing, apartment: Home, v
 const DW = 252, CW = 60
 
 export default function Sidebar({ userId, selectedFloorId, onFloorSelect }) {
+  const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false); const [mounted, setMounted] = useState(false)
   const [addOpen, setAddOpen] = useState(false); const [editOpen, setEditOpen] = useState(false)
   const [editing, setEditing] = useState(null); const [delOpen, setDelOpen] = useState(false)
@@ -39,7 +41,7 @@ export default function Sidebar({ userId, selectedFloorId, onFloorSelect }) {
             {floors.map((floor, idx) => {
               const Icon = iconMap[floor.icon] || Home; const sel = selectedFloorId === floor.id
               return (<Tooltip key={floor.id} title={collapsed ? floor.name : ''} placement="right" arrow>
-                <ListItemButton selected={sel} onClick={() => onFloorSelect(floor.id)} disableRipple sx={{ borderRadius: 2.5, mb: 0.5, py: collapsed ? 1.1 : 0.9, px: collapsed ? 1 : 1.5, justifyContent: collapsed ? 'center' : 'flex-start', minHeight: 42, opacity: mounted ? 1 : 0, transform: mounted ? 'translateX(0)' : 'translateX(-10px)', transition: `all 0.4s ease ${idx*0.05}s`, border: '1px solid transparent', position: 'relative', ...(sel ? { background: `linear-gradient(135deg, ${alpha(C.navy, 0.12)}, ${alpha(C.navy, 0.04)})`, borderColor: alpha(C.navy, 0.15), '&:hover': { background: `linear-gradient(135deg, ${alpha(C.navy, 0.18)}, ${alpha(C.navy, 0.06)})` } } : { '&:hover': { background: alpha(C.navy, 0.04), borderColor: alpha(C.navy, 0.06) } }) }}>
+                <ListItemButton selected={sel} onClick={() => { onFloorSelect(floor.id); navigate('/') }} disableRipple sx={{ borderRadius: 2.5, mb: 0.5, py: collapsed ? 1.1 : 0.9, px: collapsed ? 1 : 1.5, justifyContent: collapsed ? 'center' : 'flex-start', minHeight: 42, opacity: mounted ? 1 : 0, transform: mounted ? 'translateX(0)' : 'translateX(-10px)', transition: `all 0.4s ease ${idx*0.05}s`, border: '1px solid transparent', position: 'relative', ...(sel ? { background: `linear-gradient(135deg, ${alpha(C.navy, 0.12)}, ${alpha(C.navy, 0.04)})`, borderColor: alpha(C.navy, 0.15), '&:hover': { background: `linear-gradient(135deg, ${alpha(C.navy, 0.18)}, ${alpha(C.navy, 0.06)})` } } : { '&:hover': { background: alpha(C.navy, 0.04), borderColor: alpha(C.navy, 0.06) } }) }}>
                   <ListItemIcon sx={{ minWidth: collapsed ? 0 : 34, color: sel ? C.gold : C.muted, transition: 'all 0.3s ease', justifyContent: 'center' }}><Icon sx={{ fontSize: collapsed ? 20 : 18 }} /></ListItemIcon>
                   {!collapsed && (<>
                     <ListItemText primary={floor.name} primaryTypographyProps={{ fontSize: '0.82rem', fontWeight: sel?600:400, color: sel?C.champagne:C.platinum }} sx={{ my: 0 }} />

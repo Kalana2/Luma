@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AppBar, Toolbar, Box, Typography, Chip, Button, Breadcrumbs, alpha, IconButton, Tooltip, Menu, MenuItem, Avatar } from '@mui/material'
-import { ChevronRight, Storage, Logout, History, Person } from '@mui/icons-material'
+import { ChevronRight, Storage, Logout, Person, Home } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { seedSampleData } from '../firebase/deviceService'
 import useUserProfile from '../hooks/useUserProfile'
@@ -25,6 +25,7 @@ export default function Navbar({ userId, connectionStatus, selectedFloorId, onLo
     purple: '#6D28D9',
     muted: '#7C6B8A',
     dark: '#1A0A2E',
+    navy: '#1E3A5F',
   }
 
   const statusConfig = {
@@ -70,12 +71,12 @@ export default function Navbar({ userId, connectionStatus, selectedFloorId, onLo
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Tooltip title="View Logs & Reports" arrow>
+          <Tooltip title="Dashboard" arrow>
             <Button
               variant="outlined"
               size="small"
-              startIcon={<History sx={{ fontSize: 15 }} />}
-              onClick={() => navigate('/logs')}
+              startIcon={<Home sx={{ fontSize: 15 }} />}
+              onClick={() => navigate('/')}
               sx={{
                 borderColor: alpha(C.gold, 0.2),
                 color: C.gold,
@@ -88,7 +89,7 @@ export default function Navbar({ userId, connectionStatus, selectedFloorId, onLo
                 '&:hover': { borderColor: alpha(C.gold, 0.4), color: C.gold, background: alpha(C.gold, 0.04) },
               }}
             >
-              Logs
+              Dashboard
             </Button>
           </Tooltip>
           {seedStatus === 'success' ? (

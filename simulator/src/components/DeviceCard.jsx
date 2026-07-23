@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
-import { Card, CardContent, Box, Typography, alpha } from '@mui/material'
-import { Lightbulb, Power, ToggleOn, Iron, Videocam } from '@mui/icons-material'
+import { Card, CardContent, Box, Typography, IconButton, alpha } from '@mui/material'
+import { Lightbulb, Power, ToggleOn, Iron, Videocam, Delete } from '@mui/icons-material'
 import StatusChip from './StatusChip'
 import ToggleButton from './ToggleButton'
 
@@ -17,7 +17,7 @@ const typeConfig = {
   camera: { label: 'Camera', Icon: Videocam, color: C.emerald, bg: alpha(C.emerald, 0.08) },
 }
 
-export default function DeviceCard({ device, onToggle, onViewDetails, style }) {
+export default function DeviceCard({ device, onToggle, onViewDetails, onDelete, style }) {
   const cardRef = useRef(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const [glow, setGlow] = useState(false)
@@ -44,7 +44,25 @@ export default function DeviceCard({ device, onToggle, onViewDetails, style }) {
         transition: 'transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.45s ease',
         ...style,
         '&::before': { content: '""', position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: `linear-gradient(90deg, transparent, ${alpha(C.gold, 0.4)}, transparent)`, opacity: glow ? 1 : 0, transition: 'opacity 0.4s ease' },
+        '&:hover .device-delete-btn': { opacity: 1 },
       }}>
+      {onDelete && (
+        <IconButton
+          className="device-delete-btn"
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onDelete(device.id) }}
+          sx={{
+            position: 'absolute', top: 6, right: 6, zIndex: 10,
+            width: 28, height: 28, opacity: 0, transition: 'opacity 0.2s ease',
+            color: alpha('#BE123C', 0.5),
+            bgcolor: alpha('#0A1628', 0.6),
+            backdropFilter: 'blur(4px)',
+            '&:hover': { color: '#BE123C', bgcolor: alpha('#BE123C', 0.15) },
+          }}
+        >
+          <Delete sx={{ fontSize: 15 }} />
+        </IconButton>
+      )}
       <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

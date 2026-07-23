@@ -313,9 +313,11 @@ export async function addDevice(userId, floorId, roomId, deviceData) {
     lastSeen: Date.now(),
     userId,
   }
-  await set(ref(db, `devices/${id}`), device)
-  await set(ref(db, `users/${userId}/floors/${floorId}/rooms/${roomId}/devices/${id}`), true)
-  await set(ref(db, `users/${userId}/devices/${id}`), true)
+  await update(ref(db), {
+    [`devices/${id}`]: device,
+    [`users/${userId}/floors/${floorId}/rooms/${roomId}/devices/${id}`]: true,
+    [`users/${userId}/devices/${id}`]: true,
+  })
   return id
 }
 
