@@ -10,8 +10,7 @@ import {
   Divider,
 } from '@mui/material'
 import { HomeOutlined, StorageOutlined, SecurityOutlined, LayersOutlined } from '@mui/icons-material'
-
-const C = { gold: '#C9A84C', navy: '#1E3A5F', champagne: '#E8D5A3', muted: '#7C6B8A', platinum: '#C4B5D0', dark: '#0A1628' }
+import { C } from '../theme/colors'
 
 const features = [
   { Icon: LayersOutlined, label: 'Multi-Floor Management', desc: 'Organize devices across floors and rooms' },
@@ -24,19 +23,19 @@ export default function AboutDialog({ open, onClose }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ pb: 1 }}>
-        <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600, color: C.champagne, fontSize: '1.2rem' }}>
+        <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600, color: C.text, fontSize: '1.2rem' }}>
           About Luma Simulator
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ pt: 2 }}>
-        <Typography variant="body2" sx={{ color: C.platinum, mb: 2, lineHeight: 1.6 }}>
+        <Typography variant="body2" sx={{ color: C.textSecondary, mb: 2, lineHeight: 1.6 }}>
           Luma is a smart home monitoring and control system simulator. It demonstrates real-time device management
           with Firebase integration, supporting lights, outlets, irons, switch panels, and cameras across multiple floors.
         </Typography>
 
-        <Divider sx={{ borderColor: alpha(C.gold, 0.06), my: 2 }} />
+        <Divider sx={{ borderColor: C.border, my: 2 }} />
 
-        <Typography variant="caption" sx={{ color: C.gold, fontWeight: 600, mb: 1.5, display: 'block' }}>
+        <Typography variant="caption" sx={{ color: C.primary, fontWeight: 600, mb: 1.5, display: 'block' }}>
           FEATURES
         </Typography>
 
@@ -60,15 +59,14 @@ export default function AboutDialog({ open, onClose }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: alpha(C.navy, 0.08),
-                border: `1px solid ${alpha(C.gold, 0.08)}`,
+                bgcolor: C.blue50,
                 flexShrink: 0,
               }}
             >
-              <Icon sx={{ fontSize: 16, color: C.gold }} />
+              <Icon sx={{ fontSize: 16, color: C.primary }} />
             </Box>
             <Box>
-              <Typography sx={{ fontWeight: 600, fontSize: '0.78rem', color: C.champagne }}>
+              <Typography sx={{ fontWeight: 600, fontSize: '0.78rem', color: C.text }}>
                 {label}
               </Typography>
               <Typography variant="caption" sx={{ color: C.muted, textTransform: 'none', letterSpacing: 0, fontSize: '0.68rem' }}>
@@ -78,7 +76,7 @@ export default function AboutDialog({ open, onClose }) {
           </Box>
         ))}
 
-        <Divider sx={{ borderColor: alpha(C.gold, 0.06), my: 2 }} />
+        <Divider sx={{ borderColor: C.border, my: 2 }} />
 
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="caption" sx={{ color: C.muted, fontSize: '0.6rem' }}>
@@ -91,11 +89,6 @@ export default function AboutDialog({ open, onClose }) {
           onClick={onClose}
           variant="outlined"
           size="small"
-          sx={{
-            borderColor: alpha(C.gold, 0.12),
-            color: C.platinum,
-            '&:hover': { borderColor: alpha(C.gold, 0.25), color: C.gold },
-          }}
         >
           Close
         </Button>

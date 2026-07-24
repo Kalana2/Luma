@@ -15,7 +15,7 @@ export default function useUserLogs(userId) {
     const unsub = onValue(logRef, (snapshot) => {
       try {
         if (snapshot.exists()) {
-          const data = snapshot.val()
+          const data = snapshot.val() as Record<string, any>
           const entries = Object.entries(data).map(([id, entry]) => ({
             id,
             ...entry,

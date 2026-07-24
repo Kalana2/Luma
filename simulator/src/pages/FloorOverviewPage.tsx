@@ -4,12 +4,23 @@ import {
   Box,
   Typography,
   Grid,
-  CircularProgress,
   Button,
   IconButton,
   alpha,
-  Chip,
 } from '@mui/material'
+import {
+  Home,
+  Stairs,
+  Roofing,
+  Settings,
+  Add,
+  Delete,
+  ExpandMore,
+  Bolt,
+  ToggleOn,
+  WarningAmber,
+  Layers,
+} from '@mui/icons-material'
 import { db, ref, onValue, get } from '../firebase/firebaseConfig'
 import {
   setDeviceState,
@@ -23,21 +34,14 @@ import DeviceCard from '../components/DeviceCard'
 import AddRoomDialog from '../components/AddRoomDialog'
 import AddDeviceDialog from '../components/AddDeviceDialog'
 import ConfirmDialog from '../components/ConfirmDialog'
-import {
-  Home,
-  Stairs,
-  Roofing,
-  Layers,
-  Settings,
-  Add,
-  Delete,
-  ExpandMore,
-  Bolt,
-  ToggleOn,
-  WarningAmber,
-} from '@mui/icons-material'
+import EmptyState from '../components/EmptyState'
+import SkeletonLoader from '../components/SkeletonLoader'
+import PageHeader from '../components/PageHeader'
+import { C, statCardColors } from '../theme/colors'
+import { useToast } from '../contexts/ToastContext'
 
-const C = { gold: '#C9A84C', navy: '#1E3A5F', champagne: '#E8D5A3', platinum: '#C4B5D0', muted: '#7C6B8A', dark: '#0F1D35', emerald: '#0D9488' }
+type AnyRecord = Record<string, any>
+
 const iconMap = { home: Home, stairs: Stairs, attic: Roofing }
 
 function AnimatedNumber({ value, duration = 800 }) {
@@ -65,10 +69,11 @@ function AnimatedNumber({ value, duration = 800 }) {
 
 export default function FloorOverviewPage({ userId, selectedFloorId }) {
   const navigate = useNavigate()
+  const toast = useToast()
   const { floors, loading: floorsLoading } = useFloorList(userId)
-  const [devices, setDevices] = useState([])
+  const [devices, setDevices] = useState<Record<string, any>>({})
   const [devicesLoading, setDevicesLoading] = useState(false)
-  const [floorData, setFloorData] = useState(null)
+  const [floorData, setFloorData] = useState<Record<string, any> | null>(null)
 
   const [addRoomOpen, setAddRoomOpen] = useState(false)
   const [addDeviceOpen, setAddDeviceOpen] = useState(false)
@@ -83,42 +88,39 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
 
   useEffect(() => {
     if (!selectedFloorId) {
-      setDevices([])
+      setDevices({})
       setFloorData(null)
       return
     }
 
     setDevicesLoading(true)
-    setDevices([])
-
-    const unsubs = []
+    setDevices({})
 
     const floorRef = ref(db, `users/${userId}/floors/${selectedFloorId}`)
     const stopFloor = onValue(floorRef, (snap) => {
-      if (snap.exists()) setFloorData(snap.val())
+      if (snap.exists()) setFloorData(snap.val() as AnyRecord)
     })
-    unsubs.push(stopFloor)
 
     const devicesRef = ref(db, 'devices')
     const stopDevices = onValue(devicesRef, async (snapshot) => {
       try {
-        const allDevices = snapshot.exists() ? snapshot.val() : {}
+        const allDevices = (snapshot.exists() ? snapshot.val() : {}) as AnyRecord
         const floorSnap = await get(ref(db, `users/${userId}/floors/${selectedFloorId}`))
         if (!floorSnap.exists()) {
-          setDevices([])
+          setDevices({})
           setFloorData(null)
           setDevicesLoading(false)
           return
         }
 
-        const fData = floorSnap.val()
+        const fData = floorSnap.val() as AnyRecord
         setFloorData(fData)
 
-        const roomMap = {}
+        const roomMap: AnyRecord = {}
         if (fData.rooms) {
           for (const roomId in fData.rooms) {
-            const room = fData.rooms[roomId]
-            const devs = []
+            const room = fData.rooms[roomId] as AnyRecord
+            const devs: AnyRecord[] = []
             if (room.devices) {
               for (const did in room.devices) {
                 if (allDevices[did]) {
@@ -126,24 +128,26 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                 }
               }
             }
-            roomMap[roomId] = { name: room.name, devices: devs }
+            roomMap[roomId] = { id: roomId, name: room.name, devices: devs }
           }
         }
 
         setDevices(roomMap)
-      } catch (err) {
-        console.error('Device load error:', err)
-        setDevices([])
+      } catch {
+        setDevices({})
       }
       setDevicesLoading(false)
     })
-    unsubs.push(stopDevices)
 
-    return () => unsubs.forEach((u) => u())
+    return () => { stopFloor(); stopDevices() }
   }, [selectedFloorId, userId])
 
   const handleToggle = async (deviceId, state) => {
-    await setDeviceState(deviceId, state)
+    try {
+      await setDeviceState(deviceId, state)
+    } catch {
+      toast.toast('Failed to update device state')
+    }
   }
 
   const handleViewDetails = (deviceId) => {
@@ -160,7 +164,7 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
     try {
       await addRoom(userId, selectedFloorId, name)
     } catch (err) {
-      alert('Failed to add room: ' + (err.message || err.code))
+      toast.toast('Failed to add room: ' + (err.message || err.code))
     }
   }
 
@@ -168,7 +172,7 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
     try {
       await addDevice(userId, selectedFloorId, roomId, deviceData)
     } catch (err) {
-      alert('Failed to add device: ' + (err.message || err.code))
+      toast.toast('Failed to add device: ' + (err.message || err.code))
     }
   }
 
@@ -191,8 +195,8 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
     setCollapsedRooms((prev) => ({ ...prev, [roomId]: !prev[roomId] }))
   }
 
-  const allRoomEntries = Object.entries(devices)
-  const allDevs = allRoomEntries.flatMap(([, room]) => room.devices)
+  const allRoomEntries = Object.values(devices)
+  const allDevs = allRoomEntries.flatMap((room) => room.devices)
   const totalDevices = allDevs.length
   const onDevices = allDevs.filter((d) => d.state === 'ON' || d.status === 'ON').length
   const errorDevices = allDevs.filter((d) => d.status === 'ERROR' || d.status === 'DISCONNECTED').length
@@ -201,71 +205,49 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
   if (!selectedFloorId) {
     if (floors.length === 0 && !floorsLoading) {
       return (
-        <Box className="page-enter" sx={{ textAlign: 'center', pt: 12 }}>
-          <Box
-            sx={{
-              width: 64, height: 64, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              bgcolor: alpha(C.navy, 0.08),
-              border: `1px solid ${alpha(C.gold, 0.1)}`,
-              mx: 'auto', mb: 3,
-            }}
-          >
-            <Layers sx={{ fontSize: 28, color: C.muted }} />
-          </Box>
-          <Typography variant="h5" sx={{ color: C.champagne, fontWeight: 500 }}>
-            No floors yet
-          </Typography>
-          <Typography variant="body2" sx={{ color: C.muted, maxWidth: 360, mx: 'auto', mb: 3 }}>
-            Get started by adding a floor using the <strong>Add Floor</strong> button in the sidebar,
-            or click <strong>Seed Data</strong> in the navbar to load sample data.
-          </Typography>
-        </Box>
+        <EmptyState
+          icon={<Layers />}
+          title="No floors yet"
+          description="Add a floor using the sidebar or seed sample data from the navbar."
+        />
       )
     }
     return (
-      <Box className="page-enter" sx={{ textAlign: 'center', pt: 12 }}>
-        <Box
-          sx={{
-            width: 64, height: 64, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            bgcolor: alpha(C.navy, 0.08),
-            border: `1px solid ${alpha(C.gold, 0.1)}`,
-            mx: 'auto', mb: 3,
-          }}
-        >
-          <Settings sx={{ fontSize: 28, color: C.muted }} />
-        </Box>
-        <Typography variant="h5" sx={{ color: C.champagne, fontWeight: 500 }}>
-          Select a Floor
-        </Typography>
-        <Typography variant="body2" sx={{ color: C.muted, maxWidth: 320, mx: 'auto' }}>
-          Choose a floor from the sidebar to view and control its devices.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<Settings />}
+        title="Select a Floor"
+        description="Choose a floor from the sidebar to view and control its devices."
+      />
     )
   }
 
   if (floorsLoading || devicesLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-        <CircularProgress size={32} sx={{ color: '#3B82F6' }} />
+      <Box>
+        <SkeletonLoader type="detail" />
+        <Box sx={{ mt: 3 }}>
+          <SkeletonLoader type="stats" />
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <SkeletonLoader type="card" count={6} />
+        </Box>
       </Box>
     )
   }
 
   if (!floor) {
     return (
-      <Box sx={{ textAlign: 'center', pt: 12 }}>
-        <Typography variant="h5" sx={{ color: C.champagne, mb: 1 }}>Floor not found</Typography>
-        <Typography variant="body2" sx={{ color: C.muted }}>Try selecting a different floor.</Typography>
-      </Box>
+      <EmptyState
+        icon={<Home />}
+        title="Floor not found"
+        description="Try selecting a different floor."
+      />
     )
   }
 
   return (
-    <Box className="page-enter">
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 1.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
@@ -275,18 +257,18 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-            bgcolor: alpha(C.navy, 0.08),
-            border: `1px solid ${alpha(C.gold, 0.1)}`,
-          }}
-        >
-          {React.createElement(iconMap[floor.icon] || Home, { sx: { fontSize: 20, color: C.gold } })}
+              bgcolor: C.blue50,
+              border: `1px solid ${C.border}`,
+            }}
+          >
+            {React.createElement(iconMap[floor.icon] || Home, { sx: { fontSize: 20, color: C.primary } })}
           </Box>
           <Box>
-            <Typography variant="h4" sx={{ color: C.champagne, fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ color: C.text, fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
               {floor.name}
             </Typography>
             <Typography variant="body2" sx={{ color: C.muted }}>
-              {allRoomEntries.length} rooms &middot; <AnimatedNumber value={totalDevices} /> devices
+              {allRoomEntries.length} room{allRoomEntries.length !== 1 ? 's' : ''} &middot; <AnimatedNumber value={totalDevices} /> device{totalDevices !== 1 ? 's' : ''}
             </Typography>
           </Box>
         </Box>
@@ -296,14 +278,8 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
             size="small"
             startIcon={<Add sx={{ fontSize: 16 }} />}
             onClick={() => setAddRoomOpen(true)}
-            sx={{
-            borderColor: alpha(C.gold, 0.12),
-            color: C.platinum,
-            transition: 'all 0.3s ease',
-            '&:hover': { borderColor: alpha(C.gold, 0.25), color: C.gold, transform: 'translateY(-1px)' },
-            }}
           >
-            Add Room
+            Room
           </Button>
           <Button
             variant="contained"
@@ -311,34 +287,32 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
             startIcon={<Add sx={{ fontSize: 16 }} />}
             onClick={() => setAddDeviceOpen(true)}
             disabled={Object.keys(allRooms).length === 0}
-            sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-1px)' } }}
           >
-            Add Device
+            Device
           </Button>
         </Box>
       </Box>
 
       {totalDevices > 0 && (
-        <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
           {[
-            { label: 'Total', value: totalDevices, color: '#C9A84C', Icon: Bolt },
-            { label: 'Active', value: onDevices, color: '#0D9488', Icon: ToggleOn },
-            { label: 'Alerts', value: errorDevices, color: '#BE123C', Icon: WarningAmber },
-          ].map(({ label, value, color, Icon }) => (
+            { label: 'Total', value: totalDevices, ...statCardColors.total, Icon: Bolt },
+            { label: 'Active', value: onDevices, ...statCardColors.active, Icon: ToggleOn },
+            { label: 'Alerts', value: errorDevices, ...statCardColors.alerts, Icon: WarningAmber },
+          ].map(({ label, value, color, bg, Icon }) => (
             <Box
               key={label}
               sx={{
                 px: 2,
                 py: 1.2,
                 borderRadius: 2.5,
-                background: `linear-gradient(135deg, ${alpha(color, 0.08)}, ${alpha(color, 0.02)})`,
+                bgcolor: bg,
                 border: `1px solid ${alpha(color, 0.12)}`,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1.2,
                 flex: 1,
-                transition: 'all 0.3s ease',
-                '&:hover': { borderColor: alpha(color, 0.25), transform: 'translateY(-1px)' },
+                minWidth: 140,
               }}
             >
               <Box
@@ -349,16 +323,16 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: alpha(color, 0.1),
+                  bgcolor: alpha(color, 0.08),
                 }}
               >
                 <Icon sx={{ fontSize: 16, color }} />
               </Box>
               <Box>
-                <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.1rem', color: '#F1F5F9', lineHeight: 1.1 }}>
+                <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.1rem', color: C.text, lineHeight: 1.1 }}>
                   <AnimatedNumber value={value} />
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'none', letterSpacing: 0, fontSize: '0.62rem' }}>
+                <Typography variant="caption" sx={{ color: C.muted, textTransform: 'none', letterSpacing: 0, fontSize: '0.62rem' }}>
                   {label}
                 </Typography>
               </Box>
@@ -368,49 +342,19 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
       )}
 
       {totalDevices === 0 ? (
-        <Box
-          sx={{
-            mt: 4,
-            p: 6,
-            borderRadius: 3,
-            textAlign: 'center',
-            border: `1px solid rgba(201,168,76,0.06)`,
-            bgcolor: alpha(C.dark, 0.5),
-            animation: 'fade-slide-up 0.5s ease-out both',
-          }}
-        >
-          <Box
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: alpha(C.navy, 0.06),
-              border: `1px solid ${alpha(C.gold, 0.06)}`,
-              mx: 'auto',
-              mb: 2,
-            }}
-          >
-            <Bolt sx={{ fontSize: 24, color: C.muted }} />
-          </Box>
-          <Typography variant="h6" sx={{ color: C.muted, fontWeight: 400 }}>
-            {Object.keys(allRooms).length === 0 ? 'No rooms on this floor' : 'No devices on this floor'}
-          </Typography>
-          <Typography variant="body2" sx={{ color: C.muted }}>
-            {Object.keys(allRooms).length === 0
-              ? 'Click Add Room to create a room, then add devices.'
-              : 'Click Add Device to add devices to existing rooms.'}
-          </Typography>
-        </Box>
+        <EmptyState
+          icon={<Bolt />}
+          title={Object.keys(allRooms).length === 0 ? 'No rooms on this floor' : 'No devices on this floor'}
+          description={Object.keys(allRooms).length === 0 ? 'Click "Room" to create a room, then add devices.' : 'Click "Device" to add devices to existing rooms.'}
+          action={Object.keys(allRooms).length === 0 ? { label: 'Add Room', onClick: () => setAddRoomOpen(true) } : undefined}
+        />
       ) : (
-        allRoomEntries.map(([roomId, room], roomIdx) => {
-          const isCollapsed = collapsedRooms[roomId]
+        allRoomEntries.map((room) => {
+          const isCollapsed = collapsedRooms[room.id]
           return (
-            <Box key={roomId} sx={{ mb: 3 }}>
+            <Box key={room.id} sx={{ mb: 3 }}>
               <Box
-                onClick={() => toggleRoomCollapse(roomId)}
+                onClick={() => toggleRoomCollapse(room.id)}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -419,8 +363,13 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                   cursor: 'pointer',
                   userSelect: 'none',
                   py: 0.5,
-                  '&:hover > .room-chevron': { color: '#93C5FD' },
+                  '&:hover > .room-chevron': { color: C.primary },
                 }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleRoomCollapse(room.id) }}
+                aria-expanded={!isCollapsed}
+                aria-label={`${room.name} section`}
               >
                 <ExpandMore
                   className="room-chevron"
@@ -435,8 +384,8 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                   variant="caption"
                   sx={{
                     color: C.muted,
-                    fontSize: '0.62rem',
-                    letterSpacing: '0.12em',
+                    fontSize: '0.65rem',
+                    letterSpacing: '0.08em',
                     fontWeight: 600,
                   }}
                 >
@@ -444,12 +393,13 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={(e) => { e.stopPropagation(); setDeletingRoomId(roomId); setDeleteRoomOpen(true) }}
+                  onClick={(e) => { e.stopPropagation(); setDeletingRoomId(room.id); setDeleteRoomOpen(true) }}
+                  aria-label="Delete room"
                   sx={{
-                    color: alpha('#BE123C', 0.4),
+                    color: alpha(C.error, 0.4),
                     p: 0.3,
                     transition: 'all 0.2s ease',
-                    '&:hover': { color: '#BE123C', bgcolor: alpha('#BE123C', 0.06) },
+                    '&:hover': { color: C.error, bgcolor: C.red50 },
                   }}
                 >
                   <Delete sx={{ fontSize: 14 }} />
@@ -465,10 +415,8 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
                           device={device}
                           onToggle={handleToggle}
                           onViewDetails={handleViewDetails}
-                          onDelete={() => { setDeletingDeviceId(device.id); setDeletingDeviceRoomId(roomId); setDeleteDeviceOpen(true) }}
-                          style={{
-                            animationDelay: `${(roomIdx * 3 + idx) * 0.06}s`,
-                          }}
+                          onDelete={() => { setDeletingDeviceId(device.id); setDeletingDeviceRoomId(room.id); setDeleteDeviceOpen(true) }}
+                          style={{ animationDelay: `${idx * 0.06}s` }}
                         />
                       </Grid>
                     ))}

@@ -4,11 +4,7 @@ import {
 } from '@mui/material'
 import { EmailOutlined, LockOutlined, VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material'
 import { auth, signInWithEmailAndPassword } from '../firebase/firebaseConfig'
-
-const C = {
-  gold: '#C9A84C', navy: '#1E3A5F', champagne: '#E8D5A3', platinum: '#C4B5D0',
-  muted: '#7C6B8A', dark: '#0A1628', emerald: '#0D9488',
-}
+import { C } from '../theme/colors'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -45,46 +41,34 @@ export default function LoginPage() {
     <Box
       sx={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        bgcolor: C.dark, p: 2,
+        bgcolor: C.bg, p: 2,
       }}
     >
-      <Box
-        sx={{
-          position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ position: 'absolute', top: '-20%', right: '-10%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,58,95,0.08), transparent 60%)', filter: 'blur(100px)' }} />
-        <Box sx={{ position: 'absolute', bottom: '-20%', left: '-10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.04), transparent 60%)', filter: 'blur(100px)' }} />
-      </Box>
-
       <Box
         component="form"
         onSubmit={handleLogin}
         sx={{
-          position: 'relative', zIndex: 1,
-          width: '100%', maxWidth: 400,
-          p: 4, borderRadius: 4,
-          background: 'linear-gradient(160deg, rgba(15,29,53,0.95) 0%, rgba(18,34,60,0.7) 100%)',
-          backdropFilter: 'blur(20px)',
-          border: `1px solid ${alpha(C.gold, 0.08)}`,
-          boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
+          width: '100%', maxWidth: 380,
+          p: 4, borderRadius: 3,
+          bgcolor: C.paper,
+          border: `1px solid ${C.border}`,
+          boxShadow: C.cardShadowHover,
         }}
       >
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Box
             sx={{
               width: 56, height: 56, borderRadius: 3, mx: 'auto', mb: 2,
-              background: `linear-gradient(135deg, ${alpha(C.gold, 0.15)}, ${alpha(C.navy, 0.1)})`,
-              border: `1px solid ${alpha(C.gold, 0.1)}`,
+              bgcolor: C.blue50,
+              border: `1px solid ${alpha(C.primary, 0.15)}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 800, fontSize: '1.4rem', color: C.gold, lineHeight: 1 }}>
+            <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 800, fontSize: '1.4rem', color: C.primary, lineHeight: 1 }}>
               L
             </Typography>
           </Box>
-          <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.4rem', color: C.champagne }}>
+          <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.4rem', color: C.text }}>
             Luma
           </Typography>
           <Typography variant="caption" sx={{ color: C.muted, letterSpacing: '0.12em', fontWeight: 500, textTransform: 'uppercase', fontSize: '0.6rem' }}>
@@ -103,17 +87,7 @@ export default function LoginPage() {
           InputProps={{
             startAdornment: <EmailOutlined sx={{ fontSize: 18, color: C.muted, mr: 1 }} />,
           }}
-          sx={{
-            mb: 2,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2.5,
-              '& fieldset': { borderColor: alpha(C.gold, 0.08) },
-              '&:hover fieldset': { borderColor: alpha(C.gold, 0.2) },
-              '&.Mui-focused fieldset': { borderColor: C.navy },
-            },
-            '& .MuiInputLabel-root': { color: C.muted },
-            '& input': { color: C.champagne },
-          }}
+          sx={{ mb: 2 }}
         />
 
         <TextField
@@ -130,32 +104,22 @@ export default function LoginPage() {
               <Box
                 component="span"
                 onClick={() => setShowPw((s) => !s)}
-                sx={{ cursor: 'pointer', display: 'flex', color: C.muted, '&:hover': { color: C.champagne } }}
+                sx={{ cursor: 'pointer', display: 'flex', color: C.muted, '&:hover': { color: C.text } }}
               >
                 {showPw ? <VisibilityOffOutlined sx={{ fontSize: 18 }} /> : <VisibilityOutlined sx={{ fontSize: 18 }} />}
               </Box>
             ),
           }}
-          sx={{
-            mb: 3,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2.5,
-              '& fieldset': { borderColor: alpha(C.gold, 0.08) },
-              '&:hover fieldset': { borderColor: alpha(C.gold, 0.2) },
-              '&.Mui-focused fieldset': { borderColor: C.navy },
-            },
-            '& .MuiInputLabel-root': { color: C.muted },
-            '& input': { color: C.champagne },
-          }}
+          sx={{ mb: 3 }}
         />
 
         {error && (
           <Typography
             variant="caption"
             sx={{
-              color: '#BE123C', display: 'block', mb: 2, textAlign: 'center',
-              bgcolor: alpha('#BE123C', 0.06), py: 1, px: 1.5, borderRadius: 2,
-              border: `1px solid ${alpha('#BE123C', 0.1)}`,
+              color: C.error, display: 'block', mb: 2, textAlign: 'center',
+              bgcolor: C.red50, py: 1, px: 1.5, borderRadius: 2,
+              border: `1px solid ${alpha(C.error, 0.1)}`,
             }}
           >
             {error}
@@ -167,22 +131,9 @@ export default function LoginPage() {
           type="submit"
           disabled={loading}
           variant="contained"
-          sx={{
-            py: 1.5, borderRadius: 2.5,
-            background: `linear-gradient(135deg, ${C.navy} 0%, #15304D 100%)`,
-            boxShadow: `0 4px 16px ${alpha(C.navy, 0.35)}`,
-            color: C.champagne,
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            '&:hover': {
-              background: `linear-gradient(135deg, #2D5A8C 0%, ${C.navy} 100%)`,
-              boxShadow: `0 6px 24px ${alpha(C.navy, 0.5)}`,
-              transform: 'translateY(-1px)',
-            },
-            '&:disabled': { opacity: 0.7 },
-          }}
+          sx={{ py: 1.5, borderRadius: 2.5, fontWeight: 600, fontSize: '0.85rem' }}
         >
-          {loading ? <CircularProgress size={20} sx={{ color: C.champagne }} /> : 'Login'}
+          {loading ? <CircularProgress size={20} sx={{ color: '#FFF' }} /> : 'Login'}
         </Button>
       </Box>
     </Box>

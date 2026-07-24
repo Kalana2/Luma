@@ -15,27 +15,27 @@ export default function useFloorList(userId) {
     const unsub = onValue(floorsRef, (snapshot) => {
       try {
         if (snapshot.exists()) {
-          const data = snapshot.val()
-          const floorList = Object.entries(data).map(([id, floor]) => {
+          const data = snapshot.val() as Record<string, any>
+          const floorList = Object.entries(data || {}).map(([id, floor]) => {
+            const f = floor || {}
             let rooms = 0
             let devices = 0
-            if (floor.rooms) {
-              rooms = Object.keys(floor.rooms).length
-              for (const roomId in floor.rooms) {
-                const room = floor.rooms[roomId]
-                if (room.devices) {
+            if (f.rooms) {
+              rooms = Object.keys(f.rooms).length
+              for (const roomId in f.rooms) {
+                const room = f.rooms[roomId]
+                if (room?.devices) {
                   devices += Object.keys(room.devices).length
                 }
               }
             }
-            return { id, ...floor, rooms, devices }
+            return { id, ...f, rooms, devices }
           })
           setFloors(floorList)
         } else {
           setFloors([])
         }
-      } catch (err) {
-        console.error('Floor parse error:', err)
+      } catch {
         setFloors([])
       }
       setLoading(false)

@@ -16,7 +16,7 @@ export default function useReports(deviceIds) {
     const unsub = onValue(reportsRef, (snapshot) => {
       try {
         if (snapshot.exists()) {
-          const data = snapshot.val()
+          const data = snapshot.val() as Record<string, any>
           const entries = Object.entries(data)
             .filter(([key]) => {
               const devId = key.split('_')[0]

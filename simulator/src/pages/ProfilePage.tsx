@@ -3,8 +3,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CircularProgress,
-  Chip,
   alpha,
 } from '@mui/material'
 import {
@@ -16,15 +14,9 @@ import {
   Shield,
 } from '@mui/icons-material'
 import useUserProfile from '../hooks/useUserProfile'
-
-const C = {
-  gold: '#C9A84C',
-  navy: '#1E3A5F',
-  champagne: '#E8D5A3',
-  platinum: '#C4B5D0',
-  muted: '#7C6B8A',
-  emerald: '#0D9488',
-}
+import PageHeader from '../components/PageHeader'
+import SkeletonLoader from '../components/SkeletonLoader'
+import { C } from '../theme/colors'
 
 function getInitials(name) {
   if (!name) return '?'
@@ -35,11 +27,7 @@ export default function ProfilePage({ userId }) {
   const { userData, loading } = useUserProfile(userId)
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-        <CircularProgress size={32} sx={{ color: C.gold }} />
-      </Box>
-    )
+    return <SkeletonLoader type="detail" />
   }
 
   const profile = userData || {}
@@ -55,31 +43,12 @@ export default function ProfilePage({ userId }) {
   ]
 
   return (
-    <Box className="page-enter" sx={{ maxWidth: 600 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: alpha(C.navy, 0.08),
-            border: `1px solid ${alpha(C.gold, 0.1)}`,
-          }}
-        >
-          <Person sx={{ fontSize: 20, color: C.gold }} />
-        </Box>
-        <Box>
-          <Typography variant="h4" sx={{ color: C.champagne, fontWeight: 600 }}>
-            Profile
-          </Typography>
-          <Typography variant="body2" sx={{ color: C.muted }}>
-            Your account information
-          </Typography>
-        </Box>
-      </Box>
+    <Box sx={{ maxWidth: 600 }}>
+      <PageHeader
+        icon={<Person />}
+        title="Profile"
+        subtitle="Your account information"
+      />
 
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -91,9 +60,8 @@ export default function ProfilePage({ userId }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: `linear-gradient(135deg, ${C.navy}, ${alpha(C.gold, 0.3)})`,
-              border: `2px solid ${alpha(C.gold, 0.2)}`,
-              boxShadow: `0 0 24px ${alpha(C.gold, 0.08)}`,
+              bgcolor: C.blue50,
+              border: `2px solid ${alpha(C.primary, 0.15)}`,
             }}
           >
             <Typography
@@ -101,26 +69,20 @@ export default function ProfilePage({ userId }) {
                 fontFamily: '"Outfit", sans-serif',
                 fontSize: '2rem',
                 fontWeight: 700,
-                color: C.champagne,
+                color: C.primary,
               }}
             >
               {initials}
             </Typography>
           </Box>
-          <Typography variant="h5" sx={{ color: C.champagne, fontWeight: 600 }}>
-            {profile.name || 'User'}
-          </Typography>
-          <Chip
-            label={profile.role || 'User'}
-            size="small"
-            icon={<Shield sx={{ fontSize: 14 }} />}
-            sx={{
-              bgcolor: alpha(C.navy, 0.12),
-              color: C.platinum,
-              fontWeight: 600,
-              fontSize: '0.7rem',
-            }}
-          />
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h5" sx={{ color: C.text, fontWeight: 600 }}>
+              {profile.name || 'User'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: C.muted, mt: 0.5 }}>
+              {profile.role || 'User'}
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 
@@ -128,11 +90,11 @@ export default function ProfilePage({ userId }) {
         <CardContent sx={{ p: 3 }}>
           <Typography
             variant="caption"
-            sx={{ color: C.muted, fontSize: '0.62rem', letterSpacing: '0.12em', fontWeight: 600, mb: 2, display: 'block' }}
+            sx={{ color: C.muted, fontSize: '0.62rem', letterSpacing: '0.12em', fontWeight: 600, mb: 1.5, display: 'block' }}
           >
             Account Details
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             {fields.map(({ label, value, icon: Icon }) => (
               <Box
                 key={label}
@@ -141,7 +103,7 @@ export default function ProfilePage({ userId }) {
                   alignItems: 'center',
                   gap: 2,
                   py: 1.5,
-                  borderBottom: `1px solid ${alpha(C.gold, 0.04)}`,
+                  borderBottom: `1px solid ${C.divider}`,
                   '&:last-child': { borderBottom: 'none' },
                 }}
               >
@@ -153,7 +115,7 @@ export default function ProfilePage({ userId }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: alpha(C.navy, 0.06),
+                    bgcolor: C.bg,
                   }}
                 >
                   <Icon sx={{ fontSize: 18, color: C.muted }} />
@@ -162,7 +124,7 @@ export default function ProfilePage({ userId }) {
                   <Typography variant="caption" sx={{ color: C.muted, fontSize: '0.68rem', textTransform: 'none', letterSpacing: 0 }}>
                     {label}
                   </Typography>
-                  <Typography sx={{ color: C.champagne, fontSize: '0.85rem', fontWeight: 500 }}>
+                  <Typography sx={{ color: C.text, fontSize: '0.85rem', fontWeight: 500 }}>
                     {value}
                   </Typography>
                 </Box>

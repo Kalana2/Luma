@@ -1,7 +1,6 @@
 import { Box, Typography, alpha, IconButton, Tooltip } from '@mui/material'
 import { InfoOutlined } from '@mui/icons-material'
-
-const C = { gold: '#C9A84C', muted: '#7C6B8A', champagne: '#E8D5A3', dark: '#0A1628', navy: '#1E3A5F' }
+import { C } from '../theme/colors'
 
 export default function Footer({ onAboutClick }) {
   return (
@@ -11,8 +10,7 @@ export default function Footer({ onAboutClick }) {
         mt: 6,
         pt: 2.5,
         pb: 2,
-        px: 2,
-        borderTop: `1px solid ${alpha(C.gold, 0.06)}`,
+        borderTop: `1px solid ${C.border}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -25,17 +23,18 @@ export default function Footer({ onAboutClick }) {
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Typography variant="caption" sx={{ color: alpha(C.muted, 0.6), fontSize: '0.58rem' }}>
-          v1.0.0 &middot; Simulator
+          v1.0.0
         </Typography>
         <Tooltip title="About Luma Simulator" arrow>
           <IconButton
             size="small"
             onClick={onAboutClick}
+            aria-label="About"
             sx={{
               color: C.muted,
               width: 24,
               height: 24,
-              '&:hover': { color: C.gold, bgcolor: alpha(C.gold, 0.06) },
+              '&:hover': { color: C.primary, bgcolor: alpha(C.primary, 0.06) },
             }}
           >
             <InfoOutlined sx={{ fontSize: 14 }} />

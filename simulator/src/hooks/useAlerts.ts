@@ -16,7 +16,7 @@ export default function useAlerts(deviceIds) {
     const unsub = onValue(alertsRef, (snapshot) => {
       try {
         if (snapshot.exists()) {
-          const data = snapshot.val()
+          const data = snapshot.val() as Record<string, any>
           const entries = Object.entries(data)
             .filter(([, entry]) => deviceSet.has(entry.deviceId))
             .map(([id, entry]) => ({ id, ...entry }))

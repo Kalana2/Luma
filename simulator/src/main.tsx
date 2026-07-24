@@ -17,17 +17,30 @@ const styleEl = document.createElement('style')
 styleEl.textContent = `
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(201,168,76,0.25) transparent;
+    scrollbar-color: #CBD5E1 transparent;
   }
   *::-webkit-scrollbar { width: 4px; }
   *::-webkit-scrollbar-track { background: transparent; }
   *::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(201,168,76,0.3), rgba(109,40,217,0.2));
+    background: #CBD5E1;
     border-radius: 4px;
   }
-  *::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.5); }
+  *::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-  body { background: #0A1628; overflow-x: hidden; }
+  body { background: #F8FAFC; overflow-x: hidden; }
+
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 
   /* ---- PAGE TRANSITIONS ---- */
   @keyframes fade-slide-up {
@@ -48,48 +61,10 @@ styleEl.textContent = `
   }
   .card-stagger { animation: card-enter 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
 
-  /* ---- STATUS & RING PULSE ---- */
-  @keyframes status-pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.6); opacity: 0.4; }
-  }
-  @keyframes ring-expand {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(2.8); opacity: 0; }
-  }
-
   /* ---- SHIMMER ---- */
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
-  }
-  @keyframes gold-shimmer {
-    0% { background-position: -200% 50%; }
-    100% { background-position: 200% 50%; }
-  }
-
-  /* ---- ROYAL ORB DRIFT ---- */
-  @keyframes float-orb-1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(80px, -50px) scale(1.12); }
-    66% { transform: translate(-40px, -90px) scale(0.94); }
-  }
-  @keyframes float-orb-2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-60px, 40px) scale(1.08); }
-    66% { transform: translate(50px, 70px) scale(0.92); }
-  }
-
-  /* ---- ROTATE ---- */
-  @keyframes rotate-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  /* ---- FLOAT ---- */
-  @keyframes floating {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
   }
 
   /* ---- COLLAPSE ---- */
@@ -98,20 +73,10 @@ styleEl.textContent = `
     to { opacity: 1; max-height: 2000px; }
   }
   .collapse-enter { overflow: hidden; animation: collapse-in 0.4s ease-out both; }
-
-  /* ---- TOAST ---- */
-  @keyframes toast-in {
-    from { opacity: 0; transform: translateX(120%) scale(0.9); }
-    to { opacity: 1; transform: translateX(0) scale(1); }
-  }
-  @keyframes toast-out {
-    from { opacity: 1; transform: translateX(0) scale(1); }
-    to { opacity: 0; transform: translateX(120%) scale(0.9); }
-  }
 `
 document.head.appendChild(styleEl)
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <CssBaseline />
     <App />

@@ -19,13 +19,14 @@ import {
   ToggleOn,
   Videocam,
 } from '@mui/icons-material'
+import { C } from '../theme/colors'
 
 const deviceTypes = [
-  { value: 'outlet', label: 'Electrical Outlet', Icon: Power, color: '#3B82F6' },
+  { value: 'outlet', label: 'Electrical Outlet', Icon: Power, color: '#2563EB' },
   { value: 'light', label: 'Smart Light', Icon: Lightbulb, color: '#F59E0B' },
-  { value: 'iron', label: 'Electric Iron', Icon: Iron, color: '#EF4444' },
-  { value: 'switchPanel', label: 'Switch Panel', Icon: ToggleOn, color: '#8B5CF6' },
-  { value: 'camera', label: 'Camera', Icon: Videocam, color: '#10B981' },
+  { value: 'iron', label: 'Electric Iron', Icon: Iron, color: '#DC2626' },
+  { value: 'switchPanel', label: 'Switch Panel', Icon: ToggleOn, color: '#7C3AED' },
+  { value: 'camera', label: 'Camera', Icon: Videocam, color: '#059669' },
 ]
 
 const defaultData = {
@@ -46,8 +47,8 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
   const [endTime, setEndTime] = useState('23:00')
   const [saving, setSaving] = useState(false)
 
-  const roomOptions = rooms
-    ? Object.entries(rooms).map(([id, room]) => ({ id, name: room.name }))
+    const roomOptions = rooms
+    ? Object.entries(rooms).map(([id, room]) => ({ id, name: (room as Record<string, unknown>).name as string }))
     : []
 
   const handleSave = async () => {
@@ -59,13 +60,14 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
       case 'light':
         deviceData = { ...defaultData.light, name: name.trim(), startTime, endTime }
         break
-      case 'switchPanel':
+      case 'switchPanel': {
         const switches = {}
         for (let i = 1; i <= switchCount; i++) {
           switches[`switch${i}`] = 'OFF'
         }
         deviceData = { ...defaultData.switchPanel, name: name.trim(), switchCount, switches }
         break
+      }
       case 'iron':
         deviceData = { ...defaultData.iron, name: name.trim(), maxDurationMinutes: maxDuration }
         break
@@ -83,7 +85,7 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600, color: '#F1F5F9' }}>
+      <DialogTitle sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 600, color: C.text, pb: 1 }}>
         Add Device
       </DialogTitle>
       <DialogContent>
@@ -94,24 +96,13 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
           onChange={(e) => setName(e.target.value)}
           fullWidth
           size="small"
-          sx={{
-            mt: 1,
-            mb: 2,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2.5,
-              '& fieldset': { borderColor: alpha('#3B82F6', 0.12) },
-              '&:hover fieldset': { borderColor: alpha('#3B82F6', 0.3) },
-              '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
-            },
-            '& .MuiInputLabel-root': { color: '#64748B' },
-            '& input': { color: '#F1F5F9' },
-          }}
+          sx={{ mt: 1, mb: 2.5 }}
         />
 
-        <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#64748B', textTransform: 'none', letterSpacing: 0 }}>
+        <Typography variant="caption" sx={{ display: 'block', mb: 1, color: C.muted, textTransform: 'none', letterSpacing: 0 }}>
           Device Type
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2.5 }}>
           {deviceTypes.map(({ value, label, Icon, color }) => (
             <Box
               key={value}
@@ -123,14 +114,14 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.8,
-                bgcolor: type === value ? alpha(color, 0.1) : 'transparent',
-                border: type === value ? `1px solid ${alpha(color, 0.3)}` : '1px solid transparent',
+                bgcolor: type === value ? alpha(color, 0.06) : 'transparent',
+                border: type === value ? `1px solid ${alpha(color, 0.2)}` : '1px solid transparent',
                 transition: 'all 0.2s ease',
-                '&:hover': { bgcolor: alpha(color, 0.05) },
+                '&:hover': { bgcolor: alpha(color, 0.04) },
               }}
             >
               <Icon sx={{ fontSize: 18, color }} />
-              <Typography variant="caption" sx={{ fontSize: '0.7rem', color: type === value ? color : '#64748B', textTransform: 'none', letterSpacing: 0 }}>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', color: type === value ? color : C.textSecondary, textTransform: 'none', letterSpacing: 0 }}>
                 {label}
               </Typography>
             </Box>
@@ -144,17 +135,7 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
           onChange={(e) => setSelectedRoomId(e.target.value)}
           fullWidth
           size="small"
-          sx={{
-            mb: 2,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2.5,
-              '& fieldset': { borderColor: alpha('#3B82F6', 0.12) },
-              '&:hover fieldset': { borderColor: alpha('#3B82F6', 0.3) },
-              '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
-            },
-            '& .MuiInputLabel-root': { color: '#64748B' },
-            '& .MuiSelect-select': { color: '#F1F5F9' },
-          }}
+          sx={{ mb: 2.5 }}
         >
           {roomOptions.map((r) => (
             <MenuItem key={r.id} value={r.id}>
@@ -162,18 +143,18 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
             </MenuItem>
           ))}
           {roomOptions.length === 0 && (
-            <MenuItem disabled>No rooms available — add a room first</MenuItem>
+            <MenuItem disabled>No rooms available</MenuItem>
           )}
         </TextField>
 
         {type === 'switchPanel' && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'none', letterSpacing: 0 }}>
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="caption" sx={{ color: C.textSecondary, textTransform: 'none', letterSpacing: 0, mb: 1, display: 'block' }}>
               Switch Count: {switchCount}
             </Typography>
             <Slider
               value={switchCount}
-              onChange={(_, v) => setSwitchCount(v)}
+              onChange={(_, v) => setSwitchCount(v as number)}
               min={2}
               max={5}
               step={1}
@@ -182,22 +163,19 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
                 { value: 3, label: '3' },
                 { value: 5, label: '5' },
               ]}
-              sx={{
-                color: '#8B5CF6',
-                '& .MuiSlider-markLabel': { color: '#64748B', fontSize: '0.65rem' },
-              }}
+              sx={{ color: '#7C3AED', '& .MuiSlider-markLabel': { color: C.muted, fontSize: '0.65rem' } }}
             />
           </Box>
         )}
 
         {type === 'iron' && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'none', letterSpacing: 0 }}>
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="caption" sx={{ color: C.textSecondary, textTransform: 'none', letterSpacing: 0, mb: 1, display: 'block' }}>
               Max Duration: {maxDuration} min
             </Typography>
             <Slider
               value={maxDuration}
-              onChange={(_, v) => setMaxDuration(v)}
+              onChange={(_, v) => setMaxDuration(v as number)}
               min={5}
               max={120}
               step={5}
@@ -207,16 +185,13 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
                 { value: 60, label: '1h' },
                 { value: 120, label: '2h' },
               ]}
-              sx={{
-                color: '#EF4444',
-                '& .MuiSlider-markLabel': { color: '#64748B', fontSize: '0.65rem' },
-              }}
+              sx={{ color: '#DC2626', '& .MuiSlider-markLabel': { color: C.muted, fontSize: '0.65rem' } }}
             />
           </Box>
         )}
 
         {type === 'light' && (
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2.5 }}>
             <TextField
               label="On Time"
               type="time"
@@ -224,15 +199,7 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              sx={{
-                flex: 1,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2.5,
-                  '& fieldset': { borderColor: alpha('#3B82F6', 0.12) },
-                },
-                '& input': { color: '#F1F5F9' },
-              }}
-              inputProps={{ sx: { colorScheme: 'dark' } }}
+              sx={{ flex: 1 }}
             />
             <TextField
               label="Off Time"
@@ -241,21 +208,13 @@ export default function AddDeviceDialog({ open, onClose, onSave, rooms }) {
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              sx={{
-                flex: 1,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2.5,
-                  '& fieldset': { borderColor: alpha('#3B82F6', 0.12) },
-                },
-                '& input': { color: '#F1F5F9' },
-              }}
-              inputProps={{ sx: { colorScheme: 'dark' } }}
+              sx={{ flex: 1 }}
             />
           </Box>
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} sx={{ color: '#64748B' }}>
+        <Button onClick={onClose} sx={{ color: C.muted }}>
           Cancel
         </Button>
         <Button

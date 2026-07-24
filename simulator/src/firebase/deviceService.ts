@@ -9,7 +9,7 @@ export async function getFloors(userId) {
   ensureDb()
   const snapshot = await get(ref(db, `users/${userId}/floors`))
   if (snapshot.exists()) {
-    return Object.entries(snapshot.val()).map(([id, data]) => ({ id, ...data }))
+    return Object.entries(snapshot.val() as Record<string, object>).map(([id, data]) => ({ id, ...data }))
   }
   return []
 }
@@ -17,7 +17,7 @@ export async function getFloors(userId) {
 export async function getFloor(userId, floorId) {
   const snapshot = await get(ref(db, `users/${userId}/floors/${floorId}`))
   if (snapshot.exists()) {
-    return { id: floorId, ...snapshot.val() }
+    return { id: floorId, ...(snapshot.val() as Record<string, any>) }
   }
   return null
 }
@@ -25,13 +25,13 @@ export async function getFloor(userId, floorId) {
 export async function getDevice(deviceId) {
   const snapshot = await get(ref(db, `devices/${deviceId}`))
   if (snapshot.exists()) {
-    return { id: deviceId, ...snapshot.val() }
+    return { id: deviceId, ...(snapshot.val() as object) }
   }
   return null
 }
 
 export async function getDevicesByFloor(userId, floorId) {
-  const floor = await getFloor(userId, floorId)
+  const floor = await getFloor(userId, floorId) as Record<string, any> | null
   if (!floor || !floor.rooms) return []
 
   const deviceIds = new Set()
@@ -50,7 +50,7 @@ export async function getDevicesByFloor(userId, floorId) {
   const allDevices = snapshots.exists() ? snapshots.val() : {}
 
   return Array.from(deviceIds)
-    .map((id) => (allDevices[id] ? { id, ...allDevices[id] } : null))
+    .map((id) => (allDevices[id as string] ? { id, ...(allDevices[id as string] as object) } : null))
     .filter(Boolean)
 }
 
