@@ -107,7 +107,7 @@ export default function DeviceDetailPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800 }}>
+    <Box sx={{ maxWidth: 800, width: '100%', mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <IconButton
           onClick={() => navigate('/')}

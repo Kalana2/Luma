@@ -221,6 +221,9 @@ function AppInner() {
   const [user, setUser] = useState(null)
   const [aboutOpen, setAboutOpen] = useState(false)
   const [initializing, setInitializing] = useState(true)
+  const sessionId = useRef(
+    (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10)
+  )
 
   useEffect(() => {
     if (!auth) { setConnectionStatus('error'); setInitializing(false); return }
@@ -240,6 +243,7 @@ function AppInner() {
         environment: 'simulator',
         device: navigator.userAgent || 'unknown',
         event,
+        sessionId: sessionId.current,
         timestamp: Date.now(),
         details,
       }).catch(() => {})
@@ -305,6 +309,11 @@ function AppLayout({ userId, connectionStatus, logEvent, onOpenAbout }) {
 
     checkAndSeed()
   }, [userId])
+
+  useEffect(() => {
+    logEvent('session_start')
+    return () => { logEvent('session_end') }
+  }, [logEvent])
 
   useEffect(() => {
     const prev = prevPathRef.current

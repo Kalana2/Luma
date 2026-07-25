@@ -47,7 +47,7 @@ export default function CameraFeedPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: 900, width: '100%', mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <IconButton
           onClick={() => navigate('/')}

@@ -30,6 +30,8 @@ const eventColors = {
   device_detail_view: '#F59E0B',
   device_toggle: '#DC2626',
   switch_toggle: '#7C3AED',
+  session_start: '#059669',
+  session_end: '#DC2626',
 }
 
 function formatTime(ts) {
@@ -131,6 +133,11 @@ function UserActivityLogs({ userId }) {
             >
               {log.details.state}
             </Box>
+          )}
+          {log.sessionId && (
+            <Typography variant="caption" sx={{ color: alpha(C.muted, 0.4), fontSize: '0.6rem', ml: 'auto' }}>
+              {log.sessionId.slice(0, 8)}
+            </Typography>
           )}
         </>
       )}
@@ -313,7 +320,7 @@ export default function LogsPage({ userId }) {
   ]
 
   return (
-    <Box sx={{ maxWidth: 900 }}>
+    <Box sx={{ maxWidth: 900, width: '100%', mx: 'auto' }}>
       <PageHeader
         icon={<History />}
         title="Logs & Reports"

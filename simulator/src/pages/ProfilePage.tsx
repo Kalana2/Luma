@@ -43,7 +43,7 @@ export default function ProfilePage({ userId }) {
   ]
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
+    <Box sx={{ maxWidth: 600, width: '100%', mx: 'auto' }}>
       <PageHeader
         icon={<Person />}
         title="Profile"

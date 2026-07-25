@@ -328,7 +328,7 @@ export default function FloorOverviewPage({ userId, selectedFloorId }) {
               >
                 <Icon sx={{ fontSize: 16, color }} />
               </Box>
-              <Box>
+    <Box sx={{ width: '100%', mx: 'auto' }}>
                 <Typography sx={{ fontFamily: '"Outfit", sans-serif', fontWeight: 700, fontSize: '1.1rem', color: C.text, lineHeight: 1.1 }}>
                   <AnimatedNumber value={value} />
                 </Typography>
