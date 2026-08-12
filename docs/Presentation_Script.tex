@@ -1,0 +1,500 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks,colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{tocloft}
+\usepackage{tabularx}
+
+% ============================================================
+% COLOR PALETTE
+% ============================================================
+\definecolor{lumaprimary}{HTML}{2F6690}
+\definecolor{lumasecondary}{HTML}{16425B}
+\definecolor{lumaaccent}{HTML}{FFA630}
+\definecolor{lumagray}{HTML}{5B5B5B}
+
+% ============================================================
+% HEADER / FOOTER
+% ============================================================
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\textit{Luma -- Presentation Script}}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{\small SCS 3311 -- Mobile Application Design and Development}
+
+% ============================================================
+% SECTION TITLE STYLING
+% ============================================================
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{lumasecondary}}
+  {\thesection}{1em}{}[{\color{lumaprimary}\titlerule[1pt]}]
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{lumaprimary}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{lumasecondary}}
+  {\thesubsubsection}{1em}{}
+
+% ============================================================
+\begin{document}
+
+% ============================================================
+% TITLE PAGE
+% ============================================================
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+
+{\Huge\bfseries\color{lumasecondary} Luma}\\[0.3cm]
+{\Large\itshape\color{lumaprimary} Bright Living, Smart Control}\\[1.5cm]
+
+{\LARGE\bfseries Presentation Script}\\[0.4cm]
+{\large Video Demonstration Guide}\\[2cm]
+
+\begin{tabular}{ll}
+\textbf{Module Code:} & SCS 3311 \\[4pt]
+\textbf{Module Name:} & Mobile Application Design and Development \\[4pt]
+\textbf{Project Type:} & Mini Project \\[4pt]
+\textbf{Video Duration:} & $\leq$ 25 minutes \\[4pt]
+\end{tabular}
+
+\vspace{2cm}
+
+\fcolorbox{lumaprimary}{lumaprimary!8}{%
+\begin{minipage}{0.85\linewidth}
+\centering
+\vspace{6pt}
+{\bfseries Presenters}\\[6pt]
+\begin{tabular}{ll}
+% TODO: Add index numbers
+Blhewa (Index No.) & Android UI, Navigation, Dashboard, Reports \\
+Kalana (Index No.) & Firebase, Realtime Sync, Device Management \\
+Sahan (Index No.) & React Simulator, Cloud Functions, Testing, Docs \\
+\end{tabular}
+\vspace{6pt}
+\end{minipage}}
+
+\vfill
+{\large \today}
+\end{titlepage}
+
+% ============================================================
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Deliverable Links}
+% ============================================================
+
+\begin{longtable}{@{}p{4cm}p{10cm}@{}}
+\toprule
+\textbf{Deliverable} & \textbf{Link} \\
+\midrule
+GitHub Repository & \url{https://github.com/<username>/Luma} \\[4pt]
+% TODO: Replace with actual links
+Final APK & \url{https://github.com/<username>/Luma/releases/download/v1.0/luma.apk} \\[4pt]
+Technical Documentation & Included in \texttt{docs/Luma\_Project\_Report.pdf} \\[4pt]
+Demonstration Video & \url{https://drive.google.com/...} \\
+\bottomrule
+\end{longtable}
+
+\noindent\textit{Note: Replace all placeholder URLs above with actual links before submission.}
+
+% ============================================================
+\section{Video Structure Overview}
+% ============================================================
+
+The 25-minute video is divided into five segments. All three members appear on camera during their respective segments.
+
+\begin{longtable}{@{}p{0.6cm}p{4.4cm}p{2.6cm}p{2.4cm}p{2.4cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Segment} & \textbf{Presenter} & \textbf{Duration} & \textbf{Timestamp} \\
+\midrule
+1 & Introduction \& Project Overview & Blhewa & 4 min & 0:00--4:00 \\
+2 & Android App Demo & Blhewa & 6 min & 4:00--10:00 \\
+3 & Firebase \& Synchronization & Kalana & 6 min & 10:00--16:00 \\
+4 & Simulator \& Cloud Functions & Sahan & 6 min & 16:00--22:00 \\
+5 & Wrap-Up \& Q\&A Notes & All & 3 min & 22:00--25:00 \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\section{Part 1: Blhewa -- Introduction \& Android App}
+\label{sec:seg1}
+% ============================================================
+
+\subsection*{Segment 1 -- Introduction \& Project Overview}
+\textbf{Presenter:} Blhewa \quad |\quad \textbf{Duration:} $\sim$4 minutes
+
+\subsection{Self-Introduction (30 seconds)}
+
+\begin{quote}
+\textit{``Good [morning/afternoon]. My name is Blhewa, index number [Index No.]. I am presenting the Luma project along with my teammates Kalana and Sahan. In this video, we will demonstrate Luma -- a Smart Home Monitoring and Control System -- developed as our mini project for SCS 3311, Mobile Application Design and Development.''}
+\end{quote}
+
+\subsection{Project Motivation (1 minute)}
+
+\begin{itemize}
+    \item Explain that modern smart-home solutions require physical IoT hardware, which is expensive and outside the scope of a university mini project.
+    \item State that Luma solves this by replacing physical devices with a purpose-built \textbf{Hardware Simulator} -- a React web app that behaves identically to real IoT devices from the system's perspective.
+    \item Emphasise the educational value: the project exercises native Android development, MVVM architecture, realtime data synchronization, cloud backend integration, and multi-client system design.
+\end{itemize}
+
+\subsection{Architecture Overview (1.5 minutes)}
+
+\begin{itemize}
+    \item Describe the three major components:
+    \begin{enumerate}
+        \item \textbf{Android Application} -- Kotlin, Jetpack Compose, MVVM.
+        \item \textbf{Firebase Backend} -- Realtime Database, Cloud Functions, Cloud Messaging.
+        \item \textbf{React Hardware Simulator} -- Vite + Material UI dashboard.
+    \end{enumerate}
+    \item Explain that the Android app and the Simulator \textbf{never communicate directly}; both are independent clients of a shared Firebase Realtime Database.
+    \item Mention the serverless, Backend-as-a-Service (BaaS) architecture -- no custom REST API, no dedicated server.
+\end{itemize}
+
+\subsection{Team Contributions Summary (1 minute)}
+
+\begin{quote}
+\textit{``Our team divided the work as follows. I, Blhewa, was responsible for the Android UI -- all ten Jetpack Compose screens -- the Navigation Compose graph, the Dashboard, and the Reports screen. Kalana handled Firebase configuration, the Realtime Database schema and Security Rules, realtime synchronization, and device management. Sahan built the React Hardware Simulator Dashboard, implemented the Cloud Functions for safety automation, executed the full testing plan, and wrote the project documentation.''}
+\end{quote}
+
+% ============================================================
+\subsection*{Segment 2 -- Android App Demonstration}
+\textbf{Presenter:} Blhewa \quad |\quad \textbf{Duration:} $\sim$6 minutes
+
+\subsection{Splash Screen (15 seconds)}
+
+\begin{itemize}
+    \item Launch the app. Show the Luma logo, tagline, and progress indicator.
+    \item Mention that Firebase initialises during this screen.
+\end{itemize}
+
+\subsection{Dashboard (1 minute)}
+
+\begin{itemize}
+    \item Show the scrollable floor card list (Ground Floor, First Floor, etc.).
+    \item Demonstrate \textbf{Add Floor}: tap the FAB, enter a name, select an icon, confirm.
+    \item Demonstrate \textbf{Edit/Delete Floor}: long-press a card, show the options.
+    \item Point out the live ``devices ON'' count badge on each card.
+\end{itemize}
+
+\subsection{Floor Details \& Floor Plan (1.5 minutes)}
+
+\begin{itemize}
+    \item Tap a floor card to navigate to \textbf{Floor Details}.
+    \item Show the room grid (\texttt{LazyVerticalGrid}) -- e.g., Living Room, Kitchen, Bedroom.
+    \item Add a new room via the overflow menu.
+    \item Tap a room to open the \textbf{Floor Plan} -- the interactive 2D spatial view.
+    \item Explain that devices are positioned using normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) so the layout scales to any screen size.
+    \item Show device icons reflecting their current state (e.g., a light icon glowing amber when ON).
+\end{itemize}
+
+\subsection{Device Types Demo (2 minutes)}
+
+Demonstrate each of the five device types:
+
+\begin{enumerate}
+    \item \textbf{Electrical Outlet} -- Tap the device icon, show the simple ON/OFF toggle.
+    \item \textbf{Smart Light} -- Toggle ON/OFF, then show the schedule picker (\texttt{startTime}/\texttt{endTime}).
+    \item \textbf{Multi-Switch Panel} -- Show a 3-switch panel; toggle switches independently.
+    \item \textbf{Electric Iron} -- Toggle ON, point out the \texttt{maxDurationMinutes} field (default 30 min). Mention that a Cloud Function monitors elapsed time and auto-shuts it off.
+    \item \textbf{Camera} -- Tap ``Request Snapshot'', show the mock image appearing.
+\end{enumerate}
+
+\subsection{Reports Screen (45 seconds)}
+
+\begin{itemize}
+    \item Navigate to Reports from the Dashboard app bar.
+    \item Show the period selector (Daily / Weekly / Monthly).
+    \item Point out the bar chart of device running time and the pie chart of power usage.
+    \item Mention the safety-events log (iron auto-off events, disconnections).
+\end{itemize}
+
+\subsection{Notifications Screen (30 seconds)}
+
+\begin{itemize}
+    \item Navigate to Notifications.
+    \item Show the chronological alert list (e.g., ``Iron automatically turned OFF after 30 minutes'').
+    \item Tap an alert to navigate to the affected device.
+\end{itemize}
+
+% ============================================================
+% ============================================================
+\section{Part 2: Kalana -- Firebase \& Synchronization}
+\label{sec:seg3}
+% ============================================================
+
+\textbf{Presenter:} Kalana \quad |\quad \textbf{Duration:} $\sim$6 minutes
+
+\subsection{Self-Introduction (30 seconds)}
+
+\begin{quote}
+\textit{``Hi, I'm Kalana, index number [Index No.]. My primary responsibilities were Firebase project configuration, the Realtime Database schema design and Security Rules, the realtime synchronization implementation via the Repository pattern, and the device management screens and logic.''}
+\end{quote}
+
+\subsection{Database Schema (1.5 minutes)}
+
+\begin{itemize}
+    \item Open the Firebase Console and show the Realtime Database JSON tree.
+    \item Walk through the five top-level nodes: \texttt{users}, \texttt{floors}, \texttt{devices}, \texttt{alerts}, \texttt{reports}.
+    \item Explain the \textbf{flat device storage} design decision: devices are stored in a flat \texttt{/devices} node and referenced by ID from within \texttt{/floors/\{floorId\}/rooms/\{roomId\}/devices/\{deviceId\}: true}.
+    \item Explain why: ``This follows Firebase's recommended practice of flattening deeply nested data. It keeps individual device listeners lightweight, because subscribing to \texttt{/devices/device001} downloads only that one device's data, not the entire floor or room tree.''
+\end{itemize}
+
+\subsection{Synchronization Mechanism (2 minutes)}
+
+\textbf{Key talking points:}
+
+\begin{itemize}
+    \item The Android app and the React Simulator are \textbf{independent clients} of the same Firebase Realtime Database. They never communicate directly.
+    \item \textbf{On Android}: the \texttt{DeviceRepository} class wraps Firebase's \texttt{ValueEventListener} into a Kotlin \texttt{Flow} using \texttt{callbackFlow}. ViewModels collect this Flow via \texttt{collectAsStateWithLifecycle()}, giving automatic, lifecycle-aware recomposition.
+    \item \textbf{On React}: custom hooks like \texttt{useDeviceState} call Firebase's \texttt{onValue} listener on mount and detach on unmount.
+    \item Listeners are attached at the \textbf{narrowest possible path} -- e.g., Device Details listens only to \texttt{/devices/\{deviceId\}}, not \texttt{/devices}.
+    \item Consistency model: \textbf{eventual consistency with last-write-wins} per field, acceptable for a single-household system.
+    \item Where atomicity is needed (e.g., iron auto-shutdown setting \texttt{state=OFF} and clearing \texttt{turnedOnAt} simultaneously), Firebase's \texttt{multi-path update()} is used.
+\end{itemize}
+
+\textbf{Live demonstration:}
+\begin{quote}
+\textit{``Let me demonstrate bidirectional synchronization. I have the Android app open on this device and the Hardware Simulator open in a browser. Watch -- I'll toggle this Smart Light ON from the Android app...''}
+\end{quote}
+\begin{enumerate}
+    \item Toggle a device ON from the Android app $\rightarrow$ show it update on the Simulator within $<$1 second.
+    \item Toggle a different device from the Simulator $\rightarrow$ show it update on the Android app within $<$1 second.
+    \item Explain: ``Both writes go through Firebase. When the database value changes, all subscribed listeners fire, and both UIs update automatically.''
+\end{enumerate}
+
+\subsection{Floor Representation (1 minute)}
+
+\begin{itemize}
+    \item Explain the data model for floors:
+    \begin{itemize}
+        \item Each floor has a unique \texttt{floorId}, a \texttt{name}, an \texttt{icon}, and a \texttt{rooms} sub-map.
+        \item Each room has a \texttt{roomId}, a \texttt{name}, and a \texttt{devices} sub-map (device ID references).
+    \end{itemize}
+    \item On the Android side, the Floor Details ViewModel subscribes to \texttt{/floors/\{floorId\}/rooms}. Each room composable further subscribes to its own devices.
+    \item The Floor Plan uses normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) stored on each device record, rendered as tappable icons in a Compose Canvas that scales to any screen size.
+    \item Show the floor plan on the app and point out how device positions correspond to their physical location in the room.
+\end{itemize}
+
+\subsection{Security Rules (1 minute)}
+
+\begin{itemize}
+    \item Briefly show the Security Rules in the Firebase Console.
+    \item Explain: \texttt{/floors} and \texttt{/devices} require authentication for read/write; \texttt{/reports} is read-only for clients (only Cloud Functions can write via Admin SDK).
+    \item Mention that \texttt{.validate} rules enforce required fields (\texttt{type}, \texttt{state}, \texttt{status}) on device writes.
+\end{itemize}
+
+% ============================================================
+% ============================================================
+\section{Part 3: Sahan -- Simulator \& Cloud Functions}
+\label{sec:seg4}
+% ============================================================
+
+\textbf{Presenter:} Sahan \quad |\quad \textbf{Duration:} $\sim$6 minutes
+
+\subsection{Self-Introduction (30 seconds)}
+
+\begin{quote}
+\textit{``Hello, I'm Sahan, index number [Index No.]. I built the React Hardware Simulator Dashboard, implemented all Firebase Cloud Functions for automation, executed the testing plan, and wrote the project documentation.''}
+\end{quote}
+
+\subsection{Simulator Purpose \& Architecture (1 minute)}
+
+\begin{itemize}
+    \item Explain that the Simulator is a \textbf{completely separate React web application}; it is not part of the Android app and is not distributed to end users.
+    \item Its purpose is to stand in for physical IoT hardware during development and demonstration.
+    \item It writes realistic, time-varying state data into the same Firebase Realtime Database that the Android app reads from.
+    \item From Firebase's perspective, data from the Simulator is \textbf{indistinguishable} from data that would come from real hardware.
+    \item Tech stack: React, Vite, Material UI, Firebase JavaScript SDK.
+\end{itemize}
+
+\subsection{Simulator Operations Demo (2 minutes)}
+
+\begin{itemize}
+    \item Show the Simulator dashboard layout:
+    \begin{itemize}
+        \item \textbf{Navbar} -- title and Firebase connection status indicator.
+        \item \textbf{Sidebar} -- floor navigation (Ground Floor, First Floor, etc.).
+        \item \textbf{Device Cards} -- one per device, each with a Status Chip and Toggle Button.
+    \end{itemize}
+    \item Demonstrate toggling a device from the Simulator:
+    \begin{quote}
+    \textit{``When I click this Toggle button on the Kitchen Outlet card, it writes directly to \texttt{/devices/device002/state} in Firebase. The Android app's listener fires, and the outlet shows as ON on the phone within a fraction of a second.''}
+    \end{quote}
+    \item Show the \textbf{heartbeat mechanism}: each simulated device periodically writes a \texttt{lastSeen} timestamp, enabling the disconnection-detection Cloud Function.
+    \item Demonstrate simulating a \textbf{device error}: use the developer control to set a device to \texttt{ERROR} state. Show the red status chip in the Simulator and the corresponding alert appearing on the Android app.
+    \item Demonstrate simulating a \textbf{device disconnection}: stop the heartbeat for a device and show the \texttt{DISCONNECTED} status appearing after the threshold is exceeded.
+    \item Show the Camera device returning a mock image on snapshot request.
+\end{itemize}
+
+\subsection{Cloud Functions (2 minutes)}
+
+\begin{itemize}
+    \item Explain the role of Cloud Functions: the \textbf{only server-side logic} in Luma. They execute in Google's managed Node.js runtime in response to database triggers and scheduled events -- \textbf{not} HTTP requests.
+    \item Walk through the four Cloud Functions:
+    \begin{enumerate}
+        \item \textbf{Iron Auto-Shutdown} -- A scheduled function (runs every 1 minute) that checks all iron devices. If \texttt{state === ``ON''} and elapsed time exceeds \texttt{maxDurationMinutes}, it atomically sets \texttt{state = OFF}, clears \texttt{turnedOnAt}, writes an alert to \texttt{/alerts}, and sends a push notification via FCM.
+        \item \textbf{Disconnection Detector} -- Compares each device's \texttt{lastSeen} against the current time; marks as \texttt{DISCONNECTED} if threshold exceeded.
+        \item \textbf{Smart Light Scheduler} -- Evaluates each light's \texttt{startTime}/\texttt{endTime} and toggles state accordingly.
+        \item \textbf{Report Aggregator} -- Triggered on new \texttt{history} entries; recomputes daily/weekly/monthly totals under \texttt{/reports}.
+    \end{enumerate}
+    \item \textbf{Live demo of iron auto-shutdown}:
+    \begin{quote}
+    \textit{``For demonstration purposes, I've set the iron's maximum duration to 1 minute. Let me turn it ON from the Simulator... [wait]... and there -- the Cloud Function has detected the timeout, set the iron to OFF, and a push notification has just arrived on the Android device.''}
+    \end{quote}
+\end{itemize}
+
+\subsection{Testing Summary (30 seconds)}
+
+\begin{itemize}
+    \item Briefly mention the testing categories used: unit tests (ViewModels, hooks), UI tests (Compose, React Testing Library), integration tests (Repository against Firebase), synchronization tests (cross-client latency), Security Rules tests (Emulator Suite), and Cloud Function tests.
+    \item State that all test cases passed successfully.
+\end{itemize}
+
+% ============================================================
+\section{Segment 5 -- Wrap-Up}
+\label{sec:seg5}
+% ============================================================
+
+\textbf{Presenters:} All three members \quad |\quad \textbf{Duration:} $\sim$3 minutes
+
+\subsection{Summary (1 minute)}
+
+\begin{quote}
+\textit{``To summarise, Luma demonstrates that a fully functional, realtime, multi-client smart home platform can be built using a purely serverless, Firebase-centric architecture -- without a custom REST API, a dedicated server, or physical IoT hardware.''}
+\end{quote}
+
+Key points to reiterate:
+\begin{itemize}
+    \item The Android app and Hardware Simulator are independent clients sharing a Firebase Realtime Database.
+    \item Bidirectional synchronization with sub-second latency.
+    \item Safety automation via Cloud Functions (iron auto-shutdown).
+    \item Clean MVVM architecture on Android with Jetpack Compose.
+    \item Five device types with distinct behaviours (Outlet, Light, Switch Panel, Iron, Camera).
+\end{itemize}
+
+\subsection{Future Improvements (1 minute)}
+
+Each member briefly mentions one future direction:
+\begin{itemize}
+    \item \textbf{Blhewa:} ``Voice assistant integration with Google Assistant and Alexa.''
+    \item \textbf{Kalana:} ``Replacing the simulator with real ESP32 hardware over MQTT, with zero changes to the Android app.''
+    \item \textbf{Sahan:} ``AI-driven energy optimization using historical usage data.''
+\end{itemize}
+
+\subsection{Closing (1 minute)}
+
+\begin{quote}
+\textit{``Thank you for watching our demonstration. Our source code is available on GitHub at [URL], and the final APK can be downloaded from [URL]. The technical documentation is included in the repository's docs folder. We welcome any questions or feedback.''}
+\end{quote}
+
+% ============================================================
+\section{Technical Documentation Summary}
+\label{sec:techdoc}
+% ============================================================
+
+This section provides the concise technical documentation required by the submission guidelines, covering the synchronization mechanism, floor representation, and simulator operations.
+
+\subsection{Synchronization Mechanism}
+
+\subsubsection{Architecture}
+Luma uses a \textbf{bidirectional, Firebase-mediated synchronization model}. The Android application and the React Hardware Simulator are completely independent clients that never communicate directly. Both read from and write to the same Firebase Realtime Database, which acts as the single source of truth.
+
+\subsubsection{Android-Side Implementation}
+\begin{itemize}
+    \item The \texttt{DeviceRepository} class wraps Firebase's \texttt{ValueEventListener} and \texttt{ChildEventListener} APIs into Kotlin \texttt{Flow} objects using \texttt{callbackFlow}.
+    \item ViewModels collect these Flows using \texttt{collectAsStateWithLifecycle()}, providing automatic, lifecycle-aware UI recomposition.
+    \item Listeners are attached at the narrowest database path needed (e.g., \texttt{/devices/\{deviceId\}} for Device Details).
+\end{itemize}
+
+\subsubsection{Simulator-Side Implementation}
+\begin{itemize}
+    \item Custom React hooks (e.g., \texttt{useDeviceState}) call Firebase's \texttt{onValue} listener on component mount and detach on unmount.
+    \item Device state changes are written directly to the corresponding \texttt{/devices/\{deviceId\}/state} path.
+\end{itemize}
+
+\subsubsection{Consistency Model}
+\begin{itemize}
+    \item \textbf{Eventual consistency with last-write-wins} semantics per field.
+    \item Atomic multi-field updates use Firebase's \texttt{multi-path update()} (e.g., iron shutdown sets \texttt{state=OFF} and clears \texttt{turnedOnAt} atomically).
+\end{itemize}
+
+\subsection{Floor Representation}
+
+\subsubsection{Data Model}
+\begin{itemize}
+    \item Floors are stored under \texttt{/floors/\{floorId\}} with fields: \texttt{name}, \texttt{icon}, and a \texttt{rooms} sub-map.
+    \item Each room under \texttt{/floors/\{floorId\}/rooms/\{roomId\}} has a \texttt{name} and a \texttt{devices} sub-map containing device ID references (\texttt{deviceId: true}).
+    \item Devices themselves are stored \textbf{flat} under \texttt{/devices/\{deviceId\}} (denormalized), following Firebase best practices to keep listeners lightweight.
+\end{itemize}
+
+\subsubsection{Android Rendering}
+\begin{itemize}
+    \item \textbf{Floor Details} screen renders rooms as a responsive grid using \texttt{LazyVerticalGrid}.
+    \item \textbf{Floor Plan} screen renders a 2D spatial view where devices are positioned using normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) stored on the device record.
+    \item Device icons reflect live state (e.g., amber glow for ON lights).
+    \item The ViewModel subscribes to the floor's rooms node; each room composable subscribes to its own devices.
+\end{itemize}
+
+\subsection{Simulator Operations}
+
+\subsubsection{Purpose}
+The Hardware Simulator is a standalone React web application that emulates physical IoT hardware. It writes realistic state data into Firebase, indistinguishable from data that real devices would produce.
+
+\subsubsection{Key Operations}
+\begin{longtable}{@{}p{4cm}p{9.5cm}@{}}
+\toprule
+\textbf{Operation} & \textbf{Description} \\
+\midrule
+Device Toggle & Writes directly to \texttt{/devices/\{id\}/state}, triggering listeners on all clients. \\
+Heartbeat & Each device periodically writes a \texttt{lastSeen} timestamp, exercising the disconnection-detection Cloud Function. \\
+Error Simulation & A developer control sets a device's status to \texttt{ERROR}, testing the Android app's error-handling UI and alert generation. \\
+Disconnection Simulation & Stopping a device's heartbeat causes the Cloud Function to mark it as \texttt{DISCONNECTED} after the threshold. \\
+Camera Snapshot & Returns a pre-defined mock image, written to \texttt{lastSnapshotUrl}. \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Dashboard Layout}
+The Simulator UI consists of a Navbar (title + connection status), a Sidebar (floor navigation), and a main grid of Device Cards. Each card displays a Status Chip (ON/OFF/ERROR/DISCONNECTED) and a Toggle Button for manual control.
+
+% ============================================================
+\section{Presentation Checklist}
+% ============================================================
+
+\begin{longtable}{@{}p{0.6cm}p{10cm}p{2cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Item} & \textbf{Done?} \\
+\midrule
+1 & All three members appear on camera with self-introduction & $\square$ \\
+2 & Each member states their name, index number, and contribution & $\square$ \\
+3 & Architecture overview presented (3-component diagram) & $\square$ \\
+4 & Android app demo: all 10 screens shown & $\square$ \\
+5 & All 5 device types demonstrated & $\square$ \\
+6 & Bidirectional synchronization demonstrated live & $\square$ \\
+7 & Firebase database structure shown in Console & $\square$ \\
+8 & Floor representation explained (flat devices, normalised coords) & $\square$ \\
+9 & Simulator dashboard walkthrough completed & $\square$ \\
+10 & Iron auto-shutdown Cloud Function demonstrated live & $\square$ \\
+11 & Push notification received on Android during demo & $\square$ \\
+12 & GitHub repository URL shared & $\square$ \\
+13 & Final APK download link shared & $\square$ \\
+14 & Video does not exceed 25 minutes & $\square$ \\
+\bottomrule
+\end{longtable}
+
+\end{document}
