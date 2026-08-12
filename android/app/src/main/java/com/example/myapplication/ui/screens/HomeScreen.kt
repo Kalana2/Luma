@@ -23,44 +23,48 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.myapplication.ui.pages_controllers.HomeViewModel
 import com.example.myapplication.ui.pages_controllers.getUserData
-import com.example.myapplication.ui.pages_controllers.model.User
+import com.example.myapplication.ui.pages_controllers.model.*
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import java.io.File
 import java.util.*
 
-// ---------- Data model for a device ----------
-data class Device(
-    val id: String,
-    val name: String,
-    val icon: ImageVector,
-    var isOn: Boolean = false
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
+fun HomeScreen(
+    onLogout: () -> Unit, 
+    onProfileClick: () -> Unit,
+    homeViewModel: HomeViewModel = viewModel()
+) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     var userDetails by remember { mutableStateOf<User?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    
+    val floors by homeViewModel.floors.collectAsState()
+    val isDataLoading by homeViewModel.isLoading.collectAsState()
+    var isUserLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(currentUser?.uid) {
         currentUser?.uid?.let { uid ->
             getUserData(uid) { user ->
                 userDetails = user
-                isLoading = false
+                isUserLoading = false
             }
-        } ?: run { isLoading = false }
+        } ?: run { isUserLoading = false }
     }
 
     val hour = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
@@ -73,27 +77,12 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
         }
     }
 
-    // Mock per-floor device state with icons available in Icons.Default
-    val floors = remember {
-        mutableStateListOf(
-            "Ground Floor" to mutableStateListOf(
-                Device("gf1", "Living Room Light", Icons.Default.Star, true),
-                Device("gf2", "Main Door Lock", Icons.Default.Lock, true),
-                Device("gf3", "AC", Icons.Default.Settings, false),
-            ),
-            "First Floor" to mutableStateListOf(
-                Device("f1", "Bedroom Light", Icons.Default.Star, false),
-                Device("f2", "Fan", Icons.Default.Refresh, true),
-            ),
-            "Second Floor" to mutableStateListOf(
-                Device("s1", "Study Light", Icons.Default.Star, false),
-                Device("s2", "Smart Plug", Icons.Default.Settings, false),
-            ),
-        )
+    val totalDevices = remember(floors) { 
+        floors.sumOf { floor -> floor.rooms.sumOf { it.devices.size } } 
     }
-
-    val totalDevices = floors.sumOf { it.second.size }
-    val activeDevices = floors.sumOf { floor -> floor.second.count { it.isOn } }
+    val activeDevices = remember(floors) { 
+        floors.sumOf { floor -> floor.rooms.sumOf { room -> room.devices.count { it.isOn } } } 
+    }
 
     Scaffold(
         topBar = {
@@ -111,7 +100,7 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Sync logic */ }) {
+                    IconButton(onClick = { /* Refresh logic */ }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Sync")
                     }
                     IconButton(onClick = onLogout) {
@@ -124,7 +113,7 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
+        if (isUserLoading || isDataLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
@@ -155,13 +144,22 @@ fun HomeScreen(onLogout: () -> Unit, onProfileClick: () -> Unit) {
                     )
                 }
 
-                items(floors, key = { it.first }) { (floorName, devices) ->
+                if (floors.isEmpty()) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            Text("No devices found", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+
+                items(floors, key = { it.name }) { floor ->
                     FloorSection(
-                        floorName = floorName,
-                        devices = devices,
+                        floor = floor,
                         onToggle = { device ->
-                            val idx = devices.indexOfFirst { it.id == device.id }
-                            if (idx != -1) devices[idx] = devices[idx].copy(isOn = !devices[idx].isOn)
+                            homeViewModel.toggleDevice(device.id, device.isOn)
+                        },
+                        onSwitchToggle = { deviceId, key, state ->
+                            homeViewModel.toggleSwitch(deviceId, key, state)
                         }
                     )
                 }
@@ -306,11 +304,12 @@ fun StatDivider() {
 
 @Composable
 fun FloorSection(
-    floorName: String,
-    devices: List<Device>,
-    onToggle: (Device) -> Unit
+    floor: FloorUI,
+    onToggle: (DeviceUI) -> Unit,
+    onSwitchToggle: (String, String, Boolean) -> Unit
 ) {
     var expanded by remember { mutableStateOf(true) }
+    val devices = floor.rooms.flatMap { it.devices }
     val activeCount = devices.count { it.isOn }
 
     Card(
@@ -326,7 +325,7 @@ fun FloorSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(text = floorName, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text(text = floor.name, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                     Text(
                         text = if (activeCount > 0) "$activeCount of ${devices.size} on" else "All off",
                         fontSize = 12.sp,
@@ -347,10 +346,25 @@ fun FloorSection(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 Column {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(devices, key = { it.id }) { device ->
-                            DeviceCard(device = device, onToggle = { onToggle(device) })
+                    floor.rooms.forEach { room ->
+                        if (room.devices.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = room.name,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                items(room.devices, key = { it.id }) { device ->
+                                    DeviceCard(
+                                        device = device, 
+                                        onToggle = { onToggle(device) },
+                                        onSwitchToggle = { key, state -> onSwitchToggle(device.id, key, state) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -360,68 +374,151 @@ fun FloorSection(
 }
 
 @Composable
-fun DeviceCard(device: Device, onToggle: () -> Unit) {
+fun DeviceCard(
+    device: DeviceUI, 
+    onToggle: () -> Unit,
+    onSwitchToggle: (String, Boolean) -> Unit
+) {
+    val isSwitchPanel = device.type.lowercase() == "switchpanel"
+    val isCamera = device.type.lowercase() == "camera"
+    val isIron = device.type.lowercase() == "iron"
+
     val containerColor by animateColorAsState(
-        targetValue = if (device.isOn)
-            MaterialTheme.colorScheme.primaryContainer
-        else
-            MaterialTheme.colorScheme.surface,
+        targetValue = when {
+            device.isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f)
+            device.isOn -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        },
         animationSpec = tween(250),
         label = "deviceContainerColor"
     )
     val iconColor by animateColorAsState(
-        targetValue = if (device.isOn) MaterialTheme.colorScheme.primary else Color.Gray,
+        targetValue = when {
+            device.isError -> MaterialTheme.colorScheme.error
+            device.isOn -> MaterialTheme.colorScheme.primary
+            else -> Color.Gray
+        },
         animationSpec = tween(250),
         label = "deviceIconColor"
     )
     val scale by animateFloatAsState(
-        targetValue = if (device.isOn) 1f else 0.96f,
+        targetValue = if (device.isOn && !device.isError) 1f else 0.96f,
         animationSpec = tween(200),
         label = "deviceScale"
     )
 
     Card(
         modifier = Modifier
-            .width(108.dp)
-            .height(112.dp),
+            .width(if (isSwitchPanel) 160.dp else 118.dp)
+            .height(128.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (device.isOn) 4.dp else 0.dp),
-        onClick = onToggle
+        elevation = CardDefaults.cardElevation(defaultElevation = if (device.isOn && !device.isError) 4.dp else 0.dp),
+        onClick = { if (!device.isError && !isSwitchPanel && !isCamera) onToggle() }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(if (device.isOn) Color(0xFF4CAF50) else Color.Transparent)
-            )
+            // Status/Indicators
+            if (device.isError) {
+                 Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Error",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(16.dp)
+                )
+            } else if (!isSwitchPanel && !isCamera) {
+                Box(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(8.dp)
+                        .clip(CircleShape).background(if (device.isOn) Color(0xFF4CAF50) else Color.Transparent)
+                )
+            }
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxSize().padding(8.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = device.icon,
-                    contentDescription = device.name,
-                    tint = iconColor,
-                    modifier = Modifier.size((28 * scale).dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = device.name,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 2,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (isSwitchPanel) {
+                    Text(text = device.name, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    device.switches?.let { switches ->
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            switches.forEach { (key, state) ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().height(18.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(text = key, fontSize = 9.sp, maxLines = 1)
+                                    Switch(
+                                        checked = state,
+                                        onCheckedChange = { onSwitchToggle(key, state) },
+                                        modifier = Modifier.scale(0.4f),
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Icon(
+                        imageVector = device.icon,
+                        contentDescription = device.name,
+                        tint = iconColor,
+                        modifier = Modifier.size((28 * scale).dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = device.name,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    if (device.isError) {
+                        Text(text = "ERROR", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    } else if (isCamera) {
+                        Text(text = device.status, fontSize = 9.sp, color = MaterialTheme.colorScheme.primary)
+                    } else if (isIron && device.isOn) {
+                        IronCountdown(device.turnedOnAt, device.maxDurationMinutes)
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+fun IronCountdown(turnedOnAt: Long?, maxDuration: Int?) {
+    if (turnedOnAt == null || maxDuration == null || turnedOnAt <= 0) return
+    
+    var remainingText by remember { mutableStateOf("--:--") }
+    
+    LaunchedEffect(turnedOnAt, maxDuration) {
+        val endTime = turnedOnAt + (maxDuration * 60 * 1000L)
+        while (true) {
+            val now = System.currentTimeMillis()
+            val diff = endTime - now
+            if (diff <= 0) {
+                remainingText = "00:00"
+                break
+            }
+            val mins = (diff / 60000)
+            val secs = (diff % 60000) / 1000
+            remainingText = String.format(Locale.getDefault(), "%02d:%02d", mins, secs)
+            delay(1000)
+        }
+    }
+    
+    Text(
+        text = remainingText,
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 2.dp)
+    )
 }
