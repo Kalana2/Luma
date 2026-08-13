@@ -23,7 +23,6 @@ import {
   AccessTime,
   Timer,
   WarningAmber,
-  WifiOff,
 } from '@mui/icons-material'
 import useDeviceState from '../hooks/useDeviceState'
 import SkeletonLoader from '../components/SkeletonLoader'
@@ -33,7 +32,6 @@ import {
   updateDeviceSchedule,
   updateIronMaxDuration,
   triggerDeviceError,
-  triggerDeviceDisconnected,
 } from '../firebase/deviceService'
 import { C, deviceTypeColors } from '../theme/colors'
 import StatusChip from '../components/StatusChip'
@@ -332,15 +330,6 @@ export default function DeviceDetailPage() {
                 sx={{ borderColor: alpha(C.error, 0.2), color: C.error, '&:hover': { borderColor: C.error, bgcolor: C.red50 } }}
               >
                 Simulate Error
-              </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<WifiOff sx={{ fontSize: 14 }} />}
-                onClick={() => triggerDeviceDisconnected(deviceId)}
-                sx={{ borderColor: alpha(C.warning, 0.2), color: C.warning, '&:hover': { borderColor: C.warning, bgcolor: C.amber50 } }}
-              >
-                Simulate Disconnect
               </Button>
             </Box>
           </CardContent>

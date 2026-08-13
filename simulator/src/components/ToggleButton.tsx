@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Switch, Box, CircularProgress, alpha } from '@mui/material'
+import { Switch, Box, CircularProgress, Typography, alpha } from '@mui/material'
 import { C } from '../theme/colors'
 
 export default function ToggleButton({ checked, onChange, disabled = false }) {
@@ -32,7 +32,21 @@ export default function ToggleButton({ checked, onChange, disabled = false }) {
       {loading ? (
         <CircularProgress size={18} sx={{ color: C.primary }} />
       ) : (
-        <Switch checked={checked} onChange={handleToggle} disabled={disabled} />
+        <>
+          <Typography
+            sx={{
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              mr: 0.5,
+              color: checked ? C.success : C.muted,
+              transition: 'color 0.2s ease',
+            }}
+          >
+            {checked ? 'Active' : 'Inactive'}
+          </Typography>
+          <Switch checked={checked} onChange={handleToggle} disabled={disabled} />
+        </>
       )}
     </Box>
   )

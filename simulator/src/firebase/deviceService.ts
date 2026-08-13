@@ -126,11 +126,6 @@ export async function triggerDeviceError(deviceId) {
   await set(ref(db, `devices/${deviceId}/lastSeen`), Date.now())
 }
 
-export async function triggerDeviceDisconnected(deviceId) {
-  await set(ref(db, `devices/${deviceId}/status`), 'DISCONNECTED')
-  await set(ref(db, `devices/${deviceId}/lastSeen`), 0)
-}
-
 export async function seedSampleData(userId) {
   ensureDb()
   const seedDevices = {
