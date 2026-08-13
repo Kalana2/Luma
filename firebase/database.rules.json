@@ -12,6 +12,12 @@
         },
         "lastSeen": {
           ".validate": "newData.isNumber() || newData.val() == null"
+        },
+        "lastSnapshotUrl": {
+          ".validate": "newData.isString() || newData.val() == null"
+        },
+        "lastSnapshotImage": {
+          ".validate": "newData.isString() || newData.val() == null"
         }
       }
     },

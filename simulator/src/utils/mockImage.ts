@@ -9,6 +9,47 @@ export function generateMockImageUrl(seed = 'camera') {
   return `https://picsum.photos/seed/${seed}-${Date.now()}/${w}/${h}`
 }
 
+const THUMB_WIDTH = 640
+const THUMB_HEIGHT = 480
+
+export async function fetchImageAsBase64(url, maxWidth = THUMB_WIDTH) {
+  try {
+    const blob = await (await fetch(url)).blob()
+    if (typeof createImageBitmap === 'undefined') {
+      return await blobToDataUrl(blob)
+    }
+    const bitmap = await createImageBitmap(blob)
+    const scale = Math.min(1, maxWidth / bitmap.width)
+    const out = document.createElement('canvas')
+    out.width = Math.round(bitmap.width * scale)
+    out.height = Math.round(bitmap.height * scale)
+    const ctx = out.getContext('2d')
+    ctx.drawImage(bitmap, 0, 0, out.width, out.height)
+    bitmap.close()
+    return out.toDataURL('image/jpeg', 0.7)
+  } catch (err) {
+    console.warn('Snapshot fetch failed, using canvas fallback:', err)
+    return generateCanvasPlaceholderBase64()
+  }
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+function generateCanvasPlaceholderBase64() {
+  const canvas = document.createElement('canvas')
+  canvas.width = THUMB_WIDTH
+  canvas.height = THUMB_HEIGHT
+  generateCanvasPlaceholder(canvas, 'camera')
+  return canvas.toDataURL('image/jpeg', 0.7)
+}
+
 export function generateCanvasPlaceholder(canvas, deviceId) {
   if (!canvas) return
 

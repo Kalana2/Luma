@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.ui.screens.CameraFeedScreen
 import com.example.myapplication.ui.screens.DashboardScreen
 import com.example.myapplication.ui.screens.FloorDetailsScreen
 import com.example.myapplication.ui.screens.SignInScreen
@@ -72,7 +73,20 @@ fun AppNavigation() {
         }
         composable("floor_details/{floorId}") { backStackEntry ->
             val floorId = backStackEntry.arguments?.getString("floorId") ?: ""
-            FloorDetailsScreen(floorId = floorId, onBackClick = { navController.popBackStack() })
+            FloorDetailsScreen(
+                floorId = floorId,
+                onBackClick = { navController.popBackStack() },
+                onCameraClick = { deviceId ->
+                    navController.navigate("camera_feed/$deviceId")
+                }
+            )
+        }
+        composable("camera_feed/{deviceId}") { backStackEntry ->
+            val deviceId = backStackEntry.arguments?.getString("deviceId") ?: ""
+            CameraFeedScreen(
+                deviceId = deviceId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

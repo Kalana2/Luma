@@ -1,4 +1,5 @@
 import { db, ref, get, set, update, onValue } from './firebaseConfig'
+import { fetchImageAsBase64 } from '../utils/mockImage'
 
 function ensureDb() {
   if (!db) throw new Error('Firebase not initialized')
@@ -110,8 +111,10 @@ export async function updateIronMaxDuration(deviceId, maxDurationMinutes) {
 
 export async function requestCameraSnapshot(deviceId) {
   const snapshotUrl = `https://picsum.photos/seed/${deviceId}${Date.now()}/640/480`
+  const snapshotImage = await fetchImageAsBase64(snapshotUrl)
   await update(ref(db), {
     [`devices/${deviceId}/lastSnapshotUrl`]: snapshotUrl,
+    [`devices/${deviceId}/lastSnapshotImage`]: snapshotImage,
     [`devices/${deviceId}/lastSnapshotAt`]: Date.now(),
     [`devices/${deviceId}/lastSeen`]: Date.now(),
   })

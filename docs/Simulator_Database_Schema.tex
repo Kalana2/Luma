@@ -297,6 +297,7 @@ An outlet has no extra fields beyond the common ones; it is the baseline ON/OFF 
 \textbf{Field} & \textbf{Type} & \textbf{Values / Units} & \textbf{Description} \\
 \midrule
 \texttt{lastSnapshotUrl} & string & HTTPS URL & Most recent mock image URL (generated via \texttt{picsum.photos}). \\
+\texttt{lastSnapshotImage} & string & base64 data URL & base64-encoded JPEG of the snapshot stored so mobile clients can render the same feed without resolving an external URL. \\
 \texttt{lastSnapshotAt} & number & epoch ms & Time the snapshot was requested. \\
 \bottomrule
 \end{tabularx}
@@ -465,6 +466,7 @@ alert, report, and log records produced by the Cloud Functions and Simulator.
       "type": "camera", "name": "Garage Camera",
       "status": "ONLINE",
       "lastSnapshotUrl": "https://picsum.photos/seed/camera-garage/640/480",
+      "lastSnapshotImage": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...",
       "lastSnapshotAt": 1739000000000,
       "lastSeen": 1739000000000, "userId": "UID"
     }
