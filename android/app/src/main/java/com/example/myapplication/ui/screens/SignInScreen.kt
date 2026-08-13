@@ -14,7 +14,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import com.example.myapplication.ui.pages_controllers.login
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,12 +24,9 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-    
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Sign In") },
@@ -61,8 +60,7 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                enabled = !isLoading
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -74,37 +72,36 @@ fun SignInScreen(onBackClick: () -> Unit, onSignInSuccess: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                enabled = !isLoading
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    if (email.isEmpty() || password.isEmpty()) {
-                        scope.launch { snackbarHostState.showSnackbar("Please fill all fields") }
-                        return@Button
-                    }
-                    isLoading = true
-                    com.example.myapplication.ui.pages_controllers.login(email, password) { success, message ->
-                        isLoading = false
-                        if (success) {
-                            onSignInSuccess()
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = {
+                        if (email.isNotEmpty() && password.isNotEmpty()) {
+                            isLoading = true
+                            login(email, password) { success, message ->
+                                isLoading = false
+                                if (success) {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    onSignInSuccess()
+                                } else {
+                                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                }
+                            }
                         } else {
-                            scope.launch { snackbarHostState.showSnackbar(message ?: "Login Failed") }
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                         }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                enabled = !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
-                } else {
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
                     Text("Login", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                 }
             }

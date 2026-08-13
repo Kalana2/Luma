@@ -8,12 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.ui.screens.DashboardScreen
-import com.example.myapplication.ui.screens.FloorDetailsScreen
 import com.example.myapplication.ui.screens.SignInScreen
 import com.example.myapplication.ui.screens.SignUpScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
+import com.example.myapplication.ui.screens.HomeScreen
+import com.example.myapplication.ui.screens.ProfileScreen
 import com.example.myapplication.ui.theme.LumaaTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +31,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
+    val startDestination = if (auth.currentUser != null) "home" else "welcome"
 
-    NavHost(navController = navController, startDestination = "welcome") {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("welcome") {
             WelcomeScreen(
                 onSignInClick = { navController.navigate("signin") },
@@ -41,38 +44,29 @@ fun AppNavigation() {
         composable("signin") {
             SignInScreen(
                 onBackClick = { navController.popBackStack() },
-                onSignInSuccess = {
-                    navController.navigate("dashboard") {
+                onSignInSuccess = { 
+                    navController.navigate("home") {
                         popUpTo("welcome") { inclusive = true }
                     }
                 }
             )
         }
         composable("signup") {
-            SignUpScreen(
-                onBackClick = { navController.popBackStack() },
-                onSignUpSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("welcome") { inclusive = true }
-                    }
-                }
-            )
+            SignUpScreen(onBackClick = { navController.popBackStack() })
         }
-        composable("dashboard") {
-            DashboardScreen(
+        composable("home") {
+            HomeScreen(
                 onLogout = {
+                    auth.signOut()
                     navController.navigate("welcome") {
-                        popUpTo("dashboard") { inclusive = true }
+                        popUpTo("home") { inclusive = true }
                     }
                 },
-                onFloorClick = { floorId ->
-                    navController.navigate("floor_details/$floorId")
-                }
+                onProfileClick = { navController.navigate("profile") }
             )
         }
-        composable("floor_details/{floorId}") { backStackEntry ->
-            val floorId = backStackEntry.arguments?.getString("floorId") ?: ""
-            FloorDetailsScreen(floorId = floorId, onBackClick = { navController.popBackStack() })
+        composable("profile") {
+            ProfileScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
