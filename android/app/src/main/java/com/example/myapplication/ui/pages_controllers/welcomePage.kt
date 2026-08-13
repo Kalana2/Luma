@@ -54,3 +54,15 @@ fun registration(user: User, onResult: (Boolean, String?) -> Unit) {
         onResult(false, "Config Error: ${e.message}")
     }
 }
+
+fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+    val auth = FirebaseAuth.getInstance()
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onResult(true, "Login Successful")
+            } else {
+                onResult(false, task.exception?.message ?: "Login Failed")
+            }
+        }
+}
