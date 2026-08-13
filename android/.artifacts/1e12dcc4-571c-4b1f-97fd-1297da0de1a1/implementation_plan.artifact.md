@@ -1,53 +1,37 @@
-# Implementation Plan - Hardware Simulator Schema & Switch Panel Support
+# Implementation Plan - Fix Compilation Errors and Deprecations
 
-This plan outlines the changes required to synchronize the app's data models and logic with the official **Luma Simulator Database Schema**, with a focus on implementing independent controls for **Switch Panels**.
+This plan addresses the compilation errors related to function ambiguity, type inference, and unresolved references, as well as updating deprecated icons.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Switch Panel Support**: The `switchPanel` type uses a nested `switches` object (e.g., `switch1: "ON"`, `switch2: "OFF"`). I will update the `HomeViewModel` to parse this map, and the UI `DeviceCard` will now show individual toggles for each switch in the panel.
->
-> **Camera Type**: Cameras do not have a `state` field (`ON/OFF`). The UI will be updated to show "Online" status and potentially a "View Stream" action in the future.
->
-> **Denormalization**: I will verify that the app correctly follows the `users/{uid}/floors/.../devices/{deviceId}: true` index pattern for all fetching operations.
+> - I will remove the `login` function from `welcomePage.kt` to resolve the ambiguity with the one in `authController.kt`.
+> - I will also fix a missing parameter for `SignUpScreen` in `MainActivity.kt` which was likely causing an additional compilation error.
 
 ## Proposed Changes
 
-### [Component Name] Model Updates
+### Logic Layer - Authentication Controllers
 
-#### [MODIFY] [FirebaseModels.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/pages_controllers/model/FirebaseModels.kt)
-- Update `FirebaseDevice` to include:
-    - `lastSeen: Long`
-    - `switchCount: Int?`
-    - `switches: Map<String, String>?`
-    - `lastSnapshotUrl: String?`
-- Update `DeviceUI` to include `switches: Map<String, Boolean>?` for granular state tracking.
+#### [MODIFY] [welcomePage.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/pages_controllers/welcomePage.kt)
+- Remove the duplicate `login` function definition.
 
-### [Component Name] Logic Layer
+### UI Layer - Screens
 
-#### [MODIFY] [HomeViewModel.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/pages_controllers/HomeViewModel.kt)
-- **State Updates**: Ensure `toggleDevice` writes `lastSeen: System.currentTimeMillis()` on every change.
-- **Switch Logic**: Implement `toggleSwitch(deviceId: String, switchKey: String, currentState: Boolean)` to update specific switches in Firebase.
-- **Type-Specific Parsing**:
-    - For `camera`: Handle as a non-toggleable device.
-    - For `switchPanel`: Map the `switches` map into the `DeviceUI`.
-- **Iron Safety**: Include `turnedOnAt` and `maxDurationMinutes` in `DeviceUI` so the UI can display a real-time countdown for irons that are ON.
+#### [MODIFY] [SignInScreen.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/screens/SignInScreen.kt)
+- Update `Icons.Default.ArrowBack` to `Icons.AutoMirrored.Filled.ArrowBack`.
+- Update corresponding imports.
 
-### [Component Name] UI Layer
+#### [MODIFY] [SignUpScreen.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/screens/SignUpScreen.kt)
+- Update `Icons.Default.ArrowBack` to `Icons.AutoMirrored.Filled.ArrowBack`.
+- Update corresponding imports.
 
-#### [MODIFY] [HomeScreen.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/ui/screens/HomeScreen.kt)
-- Update `DeviceCard` to detect `switchPanel` type.
-- If it's a `switchPanel`, display a grid of small toggles within the card.
-- Connect individual switch toggles to `homeViewModel.toggleSwitch`.
-- **Timer Display**: For `iron` devices that are ON, display a "Remaining: MM:SS" timer on the card.
-- Update `DeviceCard` for `camera` types to show status instead of a toggle.
+#### [MODIFY] [MainActivity.kt](file:///D:/Projects/Lumma App/Luma/android/app/src/main/java/com/example/myapplication/MainActivity.kt)
+- Provide the missing `onSignUpSuccess` parameter to the `SignUpScreen` composable call.
 
 ## Verification Plan
 
 ### Automated Tests
-- N/A
+- Run `./gradlew :app:assembleDebug` to ensure the project compiles without errors.
 
 ### Manual Verification
-1. **Switch Panel**: Add a `switchPanel` with 3 switches in Firebase. Verify 3 toggles appear in the app and they work independently.
-2. **Camera**: Add a `camera`. Verify no toggle appears and it shows as "ONLINE".
-3. **Heartbeat**: Toggle any switch and verify `lastSeen` updates in Firebase.
+- N/A (Focus is on resolving compilation errors).

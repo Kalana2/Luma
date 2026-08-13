@@ -44,7 +44,8 @@ data class DeviceUI(
     val switches: Map<String, Boolean>? = null,
     val turnedOnAt: Long? = null,
     val maxDurationMinutes: Int? = null,
-    val snapshotUrl: String? = null
+    val snapshotUrl: String? = null,
+    val customPosition: androidx.compose.ui.geometry.Offset? = null
 )
 
 data class RoomUI(
@@ -58,13 +59,23 @@ data class FloorUI(
     val rooms: List<RoomUI>
 )
 
+data class UserLog(
+    val device: String = "",
+    val environment: String = "",
+    val event: String = "",
+    val sessionId: String = "",
+    val timestamp: Long = 0L
+)
+
 fun mapTypeToIcon(type: String): ImageVector {
     return when (type.lowercase()) {
-        "light" -> Icons.Default.Star
-        "outlet" -> Icons.Default.Settings
-        "iron" -> Icons.Default.CheckCircle
-        "switchpanel" -> Icons.Default.List
+        "light" -> Icons.Default.Lightbulb
+        "outlet" -> Icons.Default.Power
+        "iron" -> Icons.Default.Iron
+        "switchpanel" -> Icons.Default.DashboardCustomize
         "camera" -> Icons.Default.Videocam
-        else -> Icons.Default.Info
+        "ac" -> Icons.Default.AcUnit
+        "fan" -> Icons.Default.ModeFanOff
+        else -> Icons.Default.DevicesOther
     }
 }

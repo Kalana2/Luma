@@ -13,6 +13,7 @@ import com.example.myapplication.ui.screens.SignUpScreen
 import com.example.myapplication.ui.screens.WelcomeScreen
 import com.example.myapplication.ui.screens.HomeScreen
 import com.example.myapplication.ui.screens.ProfileScreen
+import com.example.myapplication.ui.screens.UserLogsScreen
 import com.example.myapplication.ui.theme.LumaaTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -52,7 +53,14 @@ fun AppNavigation() {
             )
         }
         composable("signup") {
-            SignUpScreen(onBackClick = { navController.popBackStack() })
+            SignUpScreen(
+                onBackClick = { navController.popBackStack() },
+                onSignUpSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                }
+            )
         }
         composable("home") {
             HomeScreen(
@@ -62,11 +70,15 @@ fun AppNavigation() {
                         popUpTo("home") { inclusive = true }
                     }
                 },
-                onProfileClick = { navController.navigate("profile") }
+                onProfileClick = { navController.navigate("profile") },
+                onLogsClick = { navController.navigate("logs") }
             )
         }
         composable("profile") {
             ProfileScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable("logs") {
+            UserLogsScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
