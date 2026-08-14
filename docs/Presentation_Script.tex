@@ -12,9 +12,10 @@
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{tabularx}
 \usepackage{setspace}
 \usepackage{tocloft}
-\usepackage{tabularx}
+\usepackage{amssymb}
 
 % ============================================================
 % COLOR PALETTE
@@ -22,6 +23,7 @@
 \definecolor{lumaprimary}{HTML}{2F6690}
 \definecolor{lumasecondary}{HTML}{16425B}
 \definecolor{lumaaccent}{HTML}{FFA630}
+\definecolor{lumalight}{HTML}{E8F1F5}
 \definecolor{lumagray}{HTML}{5B5B5B}
 
 % ============================================================
@@ -34,6 +36,14 @@
 \fancyhead[L]{\small\textit{Luma -- Presentation Script}}
 \fancyhead[R]{\small\thepage}
 \fancyfoot[C]{\small SCS 3311 -- Mobile Application Design and Development}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyhead[L]{\small\textit{Luma -- Presentation Script}}
+  \fancyhead[R]{\small\thepage}
+  \fancyfoot[C]{\small SCS 3311 -- Mobile Application Design and Development}
+  \renewcommand{\headrulewidth}{0.6pt}
+}
 
 % ============================================================
 % SECTION TITLE STYLING
@@ -48,7 +58,9 @@
   {\normalfont\normalsize\bfseries\color{lumasecondary}}
   {\thesubsubsection}{1em}{}
 
-% ============================================================
+\setcounter{tocdepth}{3}
+\setstretch{1.12}
+
 \begin{document}
 
 % ============================================================
@@ -56,33 +68,32 @@
 % ============================================================
 \begin{titlepage}
 \centering
-\vspace*{2cm}
+\vspace*{1.5cm}
 
 {\Huge\bfseries\color{lumasecondary} Luma}\\[0.3cm]
-{\Large\itshape\color{lumaprimary} Bright Living, Smart Control}\\[1.5cm]
+{\Large\itshape\color{lumaprimary} Bright Living, Smart Control}\\[1.2cm]
 
-{\LARGE\bfseries Presentation Script}\\[0.4cm]
-{\large Video Demonstration Guide}\\[2cm]
+{\LARGE\bfseries Detailed Presentation Script}\\[0.35cm]
+{\large With Project File Descriptions and Corresponding UI Sections}\\[1.5cm]
 
 \begin{tabular}{ll}
 \textbf{Module Code:} & SCS 3311 \\[4pt]
 \textbf{Module Name:} & Mobile Application Design and Development \\[4pt]
 \textbf{Project Type:} & Mini Project \\[4pt]
-\textbf{Video Duration:} & $\leq$ 25 minutes \\[4pt]
+\textbf{Platform:} & Android (Kotlin) $\cdot$ Firebase $\cdot$ React Simulator \\[4pt]
 \end{tabular}
 
-\vspace{2cm}
+\vspace{1.6cm}
 
-\fcolorbox{lumaprimary}{lumaprimary!8}{%
-\begin{minipage}{0.85\linewidth}
+\fcolorbox{lumaprimary}{lumalight}{%
+\begin{minipage}{0.86\linewidth}
 \centering
 \vspace{6pt}
-{\bfseries Presenters}\\[6pt]
+{\bfseries Presentation Members}\\[6pt]
 \begin{tabular}{ll}
-% TODO: Add index numbers
-Blhewa (Index No.) & Android UI, Navigation, Dashboard, Reports \\
-Kalana (Index No.) & Firebase, Realtime Sync, Device Management \\
-Sahan (Index No.) & React Simulator, Cloud Functions, Testing, Docs \\
+Member 1 & Android UI, Navigation, Dashboard, Authentication \\
+Member 2 & Firebase, Realtime Database, Synchronization, Device Data \\
+Member 3 & React Simulator, Cloud Functions, Testing, Documentation \\
 \end{tabular}
 \vspace{6pt}
 \end{minipage}}
@@ -91,410 +102,527 @@ Sahan (Index No.) & React Simulator, Cloud Functions, Testing, Docs \\
 {\large \today}
 \end{titlepage}
 
-% ============================================================
+\newpage
 \tableofcontents
 \newpage
 
 % ============================================================
-\section{Deliverable Links}
+\section{Presentation Overview}
 % ============================================================
 
-\begin{longtable}{@{}p{4cm}p{10cm}@{}}
-\toprule
-\textbf{Deliverable} & \textbf{Link} \\
-\midrule
-GitHub Repository & \url{https://github.com/<username>/Luma} \\[4pt]
-% TODO: Replace with actual links
-Final APK & \url{https://github.com/<username>/Luma/releases/download/v1.0/luma.apk} \\[4pt]
-Technical Documentation & Included in \texttt{docs/Luma\_Project\_Report.pdf} \\[4pt]
-Demonstration Video & \url{https://drive.google.com/...} \\
-\bottomrule
-\end{longtable}
-
-\noindent\textit{Note: Replace all placeholder URLs above with actual links before submission.}
-
-% ============================================================
-\section{Video Structure Overview}
-% ============================================================
-
-The 25-minute video is divided into five segments. All three members appear on camera during their respective segments.
-
-\begin{longtable}{@{}p{0.6cm}p{4.4cm}p{2.6cm}p{2.4cm}p{2.4cm}@{}}
-\toprule
-\textbf{\#} & \textbf{Segment} & \textbf{Presenter} & \textbf{Duration} & \textbf{Timestamp} \\
-\midrule
-1 & Introduction \& Project Overview & Blhewa & 4 min & 0:00--4:00 \\
-2 & Android App Demo & Blhewa & 6 min & 4:00--10:00 \\
-3 & Firebase \& Synchronization & Kalana & 6 min & 10:00--16:00 \\
-4 & Simulator \& Cloud Functions & Sahan & 6 min & 16:00--22:00 \\
-5 & Wrap-Up \& Q\&A Notes & All & 3 min & 22:00--25:00 \\
-\bottomrule
-\end{longtable}
-
-% ============================================================
-\section{Part 1: Blhewa -- Introduction \& Android App}
-\label{sec:seg1}
-% ============================================================
-
-\subsection*{Segment 1 -- Introduction \& Project Overview}
-\textbf{Presenter:} Blhewa \quad |\quad \textbf{Duration:} $\sim$4 minutes
-
-\subsection{Self-Introduction (30 seconds)}
-
+\subsection{Opening}
 \begin{quote}
-\textit{``Good [morning/afternoon]. My name is Blhewa, index number [Index No.]. I am presenting the Luma project along with my teammates Kalana and Sahan. In this video, we will demonstrate Luma -- a Smart Home Monitoring and Control System -- developed as our mini project for SCS 3311, Mobile Application Design and Development.''}
+\textit{Good morning/afternoon. Today we are presenting \textbf{Luma}, a Smart Home Monitoring and Control System developed for the module SCS 3311 -- Mobile Application Design and Development.}
 \end{quote}
 
-\subsection{Project Motivation (1 minute)}
+\begin{quote}
+\textit{Luma allows a user to monitor and control smart home devices such as lights, outlets, irons, switch panels, and cameras. Since we did not use physical IoT hardware for this mini project, we built a separate web-based hardware simulator. The simulator behaves like virtual smart devices and synchronizes with the Android application through Firebase Realtime Database.}
+\end{quote}
 
-\begin{itemize}
-    \item Explain that modern smart-home solutions require physical IoT hardware, which is expensive and outside the scope of a university mini project.
-    \item State that Luma solves this by replacing physical devices with a purpose-built \textbf{Hardware Simulator} -- a React web app that behaves identically to real IoT devices from the system's perspective.
-    \item Emphasise the educational value: the project exercises native Android development, MVVM architecture, realtime data synchronization, cloud backend integration, and multi-client system design.
-\end{itemize}
+\subsection{Project Structure}
+\begin{quote}
+\textit{The project is organized as a monorepo. The \texttt{android/} folder contains the Android mobile application. The \texttt{simulator/} folder contains the React hardware simulator. The \texttt{firebase/} folder contains Cloud Functions and database rules. The \texttt{docs/} folder contains the report, schema documentation, and presentation material.}
+\end{quote}
 
-\subsection{Architecture Overview (1.5 minutes)}
+\begin{longtable}{@{}p{3.2cm}p{10.6cm}@{}}
+\toprule
+\textbf{Folder} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{android/} & Native Android application built using Kotlin, Jetpack Compose, Firebase Authentication, and Firebase Realtime Database. \\
+\texttt{simulator/} & React and Vite web application that simulates smart home hardware and updates Firebase in real time. \\
+\texttt{firebase/} & Firebase project configuration, Realtime Database rules, and Node.js Cloud Functions for automation. \\
+\texttt{docs/} & Academic documentation, project report, database schema, and presentation script. \\
+\bottomrule
+\caption{Main project folder structure.}
+\label{tab:main-folder-structure}
+\end{longtable}
 
-\begin{itemize}
-    \item Describe the three major components:
-    \begin{enumerate}
-        \item \textbf{Android Application} -- Kotlin, Jetpack Compose, MVVM.
-        \item \textbf{Firebase Backend} -- Realtime Database, Cloud Functions, Cloud Messaging.
-        \item \textbf{React Hardware Simulator} -- Vite + Material UI dashboard.
-    \end{enumerate}
-    \item Explain that the Android app and the Simulator \textbf{never communicate directly}; both are independent clients of a shared Firebase Realtime Database.
-    \item Mention the serverless, Backend-as-a-Service (BaaS) architecture -- no custom REST API, no dedicated server.
-\end{itemize}
-
-\subsection{Team Contributions Summary (1 minute)}
+\subsection{Architecture Summary}
+\begin{quote}
+\textit{The Android app and the React simulator do not communicate directly with each other. Both are independent clients of the same Firebase Realtime Database. Firebase acts as the single source of truth. When the Android app changes a device state, the simulator receives the update through Firebase listeners. Similarly, when the simulator changes a device state, the Android app receives the update through its Firebase listener.}
+\end{quote}
 
 \begin{quote}
-\textit{``Our team divided the work as follows. I, Blhewa, was responsible for the Android UI -- all ten Jetpack Compose screens -- the Navigation Compose graph, the Dashboard, and the Reports screen. Kalana handled Firebase configuration, the Realtime Database schema and Security Rules, realtime synchronization, and device management. Sahan built the React Hardware Simulator Dashboard, implemented the Cloud Functions for safety automation, executed the full testing plan, and wrote the project documentation.''}
+\textit{Firebase Cloud Functions provide backend automation. For example, the iron auto-shutdown function checks whether an iron has been on for too long and automatically turns it off for safety.}
 \end{quote}
 
 % ============================================================
-\subsection*{Segment 2 -- Android App Demonstration}
-\textbf{Presenter:} Blhewa \quad |\quad \textbf{Duration:} $\sim$6 minutes
+\section{File and UI Correspondence Summary}
+% ============================================================
 
-\subsection{Splash Screen (15 seconds)}
+\begin{longtable}{@{}p{5.2cm}p{3.5cm}p{5.2cm}@{}}
+\toprule
+\textbf{Project File} & \textbf{Corresponding UI / Feature} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{android/.../MainActivity.kt} & Android navigation root & Launches the app, applies the theme, and defines navigation routes. \\
+\texttt{android/.../WelcomeScreen.kt} & Welcome UI & Shows welcome image, title, tagline, Sign In button, and Sign Up button. \\
+\texttt{android/.../SignInScreen.kt} & Login UI & Provides email/password login and calls Firebase authentication logic. \\
+\texttt{android/.../SignUpScreen.kt} & Registration UI & Collects user details and creates a new account. \\
+\texttt{android/.../welcomePage.kt} & Auth controller functions & Contains \texttt{registration()} and \texttt{login()} functions using Firebase Auth and Realtime Database. \\
+\texttt{android/.../ValidationUtils.kt} & Form validation & Validates registration inputs before account creation. \\
+\texttt{android/.../DashboardScreen.kt} & Mobile dashboard & Shows user greeting, energy card, floor cards, bottom navigation, and add-floor dialog. \\
+\texttt{android/.../FloorDetailsScreen.kt} & Floor device list & Shows devices for a selected floor and opens camera feed for camera devices. \\
+\texttt{android/.../CameraFeedScreen.kt} & Mobile camera feed & Displays camera snapshot, live/offline state, and last snapshot time. \\
+\texttt{android/.../ui/theme/*.kt} & Android styling & Defines colors, typography, and app theme. \\
+\texttt{simulator/src/App.tsx} & Simulator app shell & Sets up routing, theme, Firebase auth state, navbar, sidebar, and page layout. \\
+\texttt{simulator/src/pages/LoginPage.tsx} & Simulator login UI & Authenticates simulator users through Firebase Authentication. \\
+\texttt{simulator/src/pages/FloorOverviewPage.tsx} & Simulator dashboard & Shows selected floor, rooms, device cards, summary stats, and add/delete controls. \\
+\texttt{simulator/src/components/DeviceCard.tsx} & Device card UI & Displays each device with icon, status chip, and control actions. \\
+\texttt{simulator/src/pages/DeviceDetailPage.tsx} & Simulator device details & Shows device-specific controls such as schedules, switch panel controls, iron timer, and error simulation. \\
+\texttt{simulator/src/pages/CameraFeedPage.tsx} & Simulator camera feed & Shows mock camera snapshot and Capture Snapshot button. \\
+\texttt{simulator/src/pages/LogsPage.tsx} & Logs, reports, alerts & Shows activity logs, device history, reports, and alert events. \\
+\texttt{simulator/src/pages/ProfilePage.tsx} & Profile UI & Displays account information read from Firebase. \\
+\texttt{simulator/src/firebase/firebaseConfig.ts} & Firebase setup & Initializes Firebase app, auth, and database connection using environment variables. \\
+\texttt{simulator/src/firebase/deviceService.ts} & Simulator data service & Contains functions for floors, rooms, devices, toggles, schedules, snapshots, and errors. \\
+\texttt{firebase/functions/src/index.js} & Cloud Function exports & Exports all backend automation functions. \\
+\texttt{firebase/functions/src/ironAutoShutdown.js} & Iron safety automation & Automatically turns off irons after the configured duration. \\
+\texttt{firebase/functions/src/lightScheduler.js} & Light scheduling & Turns lights on/off based on saved time schedules. \\
+\texttt{firebase/functions/src/disconnectionDetector.js} & Connectivity monitoring & Marks devices as disconnected when heartbeat timestamps are too old. \\
+\texttt{firebase/functions/src/reportAggregator.js} & Usage report generation & Calculates running time and estimated energy usage when devices turn off. \\
+\texttt{firebase/functions/src/alertNotifier.js} & Alert handling & Processes new alert entries and logs alert information. \\
+\texttt{firebase/database.rules.json} & Database security & Defines Realtime Database read/write security rules. \\
+\bottomrule
+\caption{Project files mapped to their corresponding UI sections and features.}
+\label{tab:file-ui-map}
+\end{longtable}
 
+% ============================================================
+\section{Android Application Script}
+% ============================================================
+
+\subsection{Android Entry Point and Navigation}
+\begin{quote}
+\textit{Now I will explain the Android application. The Android application starts from \texttt{MainActivity.kt}. This file is the entry point of the mobile app. It enables edge-to-edge display, applies the \texttt{LumaaTheme}, and calls the \texttt{AppNavigation()} composable.}
+\end{quote}
+
+\begin{quote}
+\textit{Inside \texttt{AppNavigation()}, the app uses Jetpack Navigation Compose. The main routes are \texttt{welcome}, \texttt{signin}, \texttt{signup}, \texttt{dashboard}, \texttt{floor\_details/\{floorId\}}, and \texttt{camera\_feed/\{deviceId\}}. This navigation flow allows the user to move from the welcome screen to authentication, then to the dashboard, then to floor details and camera monitoring.}
+\end{quote}
+
+\subsection{Welcome Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/WelcomeScreen.kt}
+
+\begin{quote}
+\textit{The first UI section is the Welcome Screen. This screen displays the welcome image, the title ``Welcome Lumaa'', the subtitle ``Make your home smarter'', and two main buttons: Sign In and Sign Up. It introduces the purpose of the app before the user logs in or creates an account.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
 \begin{itemize}
-    \item Launch the app. Show the Luma logo, tagline, and progress indicator.
-    \item Mention that Firebase initialises during this screen.
+    \item Welcome image from Android resources.
+    \item Main title: \texttt{Welcome Lumaa}.
+    \item Subtitle: \texttt{Make your home smarter}.
+    \item \textbf{Sign In} button.
+    \item \textbf{Sign Up} button.
+    \item Description text explaining that Luma helps users control, monitor, and automate their smart home.
 \end{itemize}
 
-\subsection{Dashboard (1 minute)}
+\subsection{Sign In Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/SignInScreen.kt}
 
+\begin{quote}
+\textit{The Sign In Screen is used for user login. It contains an email field, a password field, and a Login button. If either field is empty, a snackbar message asks the user to fill all fields. When the user enters valid credentials, the screen calls the \texttt{login()} function and navigates to the dashboard after successful authentication.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
 \begin{itemize}
-    \item Show the scrollable floor card list (Ground Floor, First Floor, etc.).
-    \item Demonstrate \textbf{Add Floor}: tap the FAB, enter a name, select an icon, confirm.
-    \item Demonstrate \textbf{Edit/Delete Floor}: long-press a card, show the options.
-    \item Point out the live ``devices ON'' count badge on each card.
+    \item Top app bar with back button.
+    \item Email input field.
+    \item Password input field with password masking.
+    \item Login button.
+    \item Loading indicator while authentication is running.
+    \item Snackbar for validation and login errors.
 \end{itemize}
 
-\subsection{Floor Details \& Floor Plan (1.5 minutes)}
+\subsection{Sign Up Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/SignUpScreen.kt}
 
+\begin{quote}
+\textit{The Sign Up Screen is used to create a new Luma account. This screen collects full name, email address, phone number, home address, and password. Before creating the account, the app validates the input using \texttt{ValidationUtils.kt}. If validation passes, it creates a Firebase Authentication account and stores the profile details in Firebase Realtime Database.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
 \begin{itemize}
-    \item Tap a floor card to navigate to \textbf{Floor Details}.
-    \item Show the room grid (\texttt{LazyVerticalGrid}) -- e.g., Living Room, Kitchen, Bedroom.
-    \item Add a new room via the overflow menu.
-    \item Tap a room to open the \textbf{Floor Plan} -- the interactive 2D spatial view.
-    \item Explain that devices are positioned using normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) so the layout scales to any screen size.
-    \item Show device icons reflecting their current state (e.g., a light icon glowing amber when ON).
+    \item Full Name input field.
+    \item Email Address input field.
+    \item Phone Number input field.
+    \item Home Address input field.
+    \item Password input field.
+    \item Sign Up button.
+    \item Loading indicator.
+    \item Snackbar messages for errors and success.
 \end{itemize}
 
-\subsection{Device Types Demo (2 minutes)}
+\subsection{Authentication Controller}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/pages\_controllers/welcomePage.kt}
 
-Demonstrate each of the five device types:
+\begin{quote}
+\textit{The authentication logic is handled in \texttt{welcomePage.kt}. The \texttt{registration()} function creates a new user with Firebase Authentication and then writes user data such as name, email, phone, address, and role into the \texttt{users} node of Firebase Realtime Database. The \texttt{login()} function signs in the user using Firebase Authentication.}
+\end{quote}
 
+\subsection{Dashboard Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/DashboardScreen.kt}
+
+\begin{quote}
+\textit{After login, the user reaches the Dashboard Screen. This is the main smart home control screen in the Android app. The dashboard reads the user name and floor data from Firebase. It shows a welcome message, an estimated energy card, a Smart Home Controller section, floor cards, a bottom navigation bar, and a floating action button.}
+\end{quote}
+
+\begin{quote}
+\textit{Each floor card represents a floor of the home. The card shows the floor icon, floor name, a short description, and a switch. The user can tap a floor card to open the Floor Details Screen. The floating action button opens a dialog to add a new floor. If the user edits an existing floor, the same dialog can update the floor name and icon.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
+\begin{itemize}
+    \item Navigation drawer with Profile, Settings, and Logout options.
+    \item Top app bar with menu and profile icon.
+    \item Greeting section: \texttt{Welcome Home} and user name.
+    \item Estimated energy card.
+    \item \texttt{Smart Home Controller} heading.
+    \item Floor cards displayed in a two-column grid.
+    \item Floor switch to update \texttt{isOn}.
+    \item Floating action button for adding floors.
+    \item Add/Edit Floor dialog with floor name and icon selector.
+\end{itemize}
+
+\subsection{Floor Details Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/FloorDetailsScreen.kt}
+
+\begin{quote}
+\textit{When the user taps a floor card, the app navigates to the Floor Details Screen. This screen receives the selected \texttt{floorId} from the navigation route. It reads the selected floor name and its related device IDs from Firebase. Then it loads the device details from the global \texttt{devices} node.}
+\end{quote}
+
+\begin{quote}
+\textit{The UI shows a top app bar with the floor name and the subtitle ``Smart Devices''. If the data is loading, a progress indicator is displayed. If no devices exist, the app shows a ``No devices found'' message. Otherwise, the devices are shown in a list.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
+\begin{itemize}
+    \item Back button.
+    \item Floor name title.
+    \item \texttt{Smart Devices} subtitle.
+    \item Loading progress indicator.
+    \item Empty state for no devices.
+    \item Device rows with icon, name, and status.
+    \item \texttt{View Feed} action for camera devices.
+\end{itemize}
+
+\subsection{Camera Feed Screen}
+\textbf{File:} \texttt{android/app/src/main/java/com/example/myapplication/ui/screens/CameraFeedScreen.kt}
+
+\begin{quote}
+\textit{The Camera Feed Screen is opened when the user selects a camera device. It receives the \texttt{deviceId} from navigation and listens to \texttt{devices/\{deviceId\}} in Firebase. It reads the camera name, status, last snapshot timestamp, and Base64 snapshot image.}
+\end{quote}
+
+\begin{quote}
+\textit{If there is no snapshot, the screen shows a ``No snapshot yet'' message. If a snapshot exists, the app decodes the Base64 image and displays it as the camera preview. At the bottom of the preview, the app shows whether the camera is LIVE or OFFLINE and displays the last snapshot time.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
+\begin{itemize}
+    \item Back button.
+    \item Camera name.
+    \item Camera Feed subtitle.
+    \item Snapshot image preview.
+    \item LIVE/OFFLINE indicator.
+    \item Last snapshot timestamp.
+    \item Empty state when no snapshot is available.
+\end{itemize}
+
+% ============================================================
+\section{React Hardware Simulator Script}
+% ============================================================
+
+\subsection{Simulator Purpose}
+\begin{quote}
+\textit{Now I will explain the React hardware simulator. The simulator is a separate web application located in the \texttt{simulator/} folder. It is not part of the Android app. Its purpose is to replace physical IoT hardware during development and demonstration.}
+\end{quote}
+
+\begin{quote}
+\textit{When a device is toggled in the simulator, the simulator writes the updated state to Firebase. The Android app receives the change in real time. From Firebase's point of view, simulator data behaves like data from real IoT hardware.}
+\end{quote}
+
+\subsection{Simulator App Shell}
+\textbf{File:} \texttt{simulator/src/App.tsx}
+
+\begin{quote}
+\textit{The main simulator file is \texttt{App.tsx}. This file creates the Material UI theme, checks Firebase authentication state, sets up logging, and defines the React routes. It also renders the Navbar, Sidebar, footer, and the main page area.}
+\end{quote}
+
+\textbf{Corresponding UI sections:}
+\begin{itemize}
+    \item Login state handling.
+    \item Top navigation bar.
+    \item Sidebar floor selector.
+    \item Main content area.
+    \item Routes for floor overview, device details, camera feed, logs, and profile.
+    \item About dialog and footer.
+\end{itemize}
+
+\subsection{Simulator Login Page}
+\textbf{File:} \texttt{simulator/src/pages/LoginPage.tsx}
+
+\begin{quote}
+\textit{The simulator also has a login page. This page shows the Luma Hardware Simulator login form. It contains email and password fields, a password visibility toggle, error messages, and a login button. It authenticates the user through Firebase Authentication.}
+\end{quote}
+
+\subsection{Floor Overview Page}
+\textbf{File:} \texttt{simulator/src/pages/FloorOverviewPage.tsx}
+
+\begin{quote}
+\textit{The Floor Overview Page is the main simulator dashboard. It shows the selected floor, rooms, device cards, and summary statistics. It also allows users to add rooms, add devices, delete rooms, delete devices, collapse room sections, and toggle devices.}
+\end{quote}
+
+\begin{quote}
+\textit{This page listens to Firebase using \texttt{onValue}. When data changes in Firebase, the simulator updates automatically. The page also calculates total devices, active devices, and error devices for the selected floor.}
+\end{quote}
+
+\textbf{Corresponding UI elements:}
+\begin{itemize}
+    \item Selected floor header.
+    \item Summary stat cards.
+    \item Room sections.
+    \item Add Room button.
+    \item Add Device button.
+    \item Delete room/device confirmation dialogs.
+    \item Device cards.
+    \item Empty and loading states.
+\end{itemize}
+
+\subsection{Device Card Component}
+\textbf{File:} \texttt{simulator/src/components/DeviceCard.tsx}
+
+\begin{quote}
+\textit{The Device Card component is a reusable UI component used inside the simulator dashboard. Each device card displays the device icon, device name, type, current status, and control actions. This is the simulator's main device-level UI section.}
+\end{quote}
+
+\subsection{Device Detail Page}
+\textbf{File:} \texttt{simulator/src/pages/DeviceDetailPage.tsx}
+
+\begin{quote}
+\textit{The Device Detail Page shows detailed controls for a selected device. It changes its UI depending on the device type. For normal devices, it shows power control. For smart lights, it shows schedule fields. For switch panels, it shows individual switch controls. For irons, it shows an auto-shutdown timer slider. For cameras, it provides a link to the camera feed.}
+\end{quote}
+
+\textbf{Corresponding UI sections:}
+\begin{itemize}
+    \item Device header with icon, name, and type.
+    \item Status and Power card.
+    \item Auto Schedule card for smart lights.
+    \item Switches card for switch panel devices.
+    \item Auto Shutdown Timer card for iron devices.
+    \item Snapshot card for camera devices.
+    \item Simulator Controls card with Simulate Error button.
+\end{itemize}
+
+\subsection{Camera Feed Page}
+\textbf{File:} \texttt{simulator/src/pages/CameraFeedPage.tsx}
+
+\begin{quote}
+\textit{The simulator Camera Feed Page displays a mock camera snapshot. It shows the camera name, live/offline indicator, last snapshot time, and a Capture Snapshot button. When the Capture Snapshot button is clicked, the simulator requests a new mock image and writes the snapshot information to Firebase. The Android camera screen can then display the same updated image.}
+\end{quote}
+
+\subsection{Logs Page}
+\textbf{File:} \texttt{simulator/src/pages/LogsPage.tsx}
+
+\begin{quote}
+\textit{The Logs Page displays activity logs, device history, reports, and alerts. For example, page navigation, device toggles, switch toggles, device running history, estimated energy usage, and alert events can be shown here. This page is important for demonstrating monitoring and reporting features.}
+\end{quote}
+
+\subsection{Profile Page}
+\textbf{File:} \texttt{simulator/src/pages/ProfilePage.tsx}
+
+\begin{quote}
+\textit{The Profile Page displays user account information such as name, email, phone number, address, user ID, and role. It reads this information from Firebase and presents it in a clean account details layout.}
+\end{quote}
+
+\subsection{Simulator Firebase Service}
+\textbf{File:} \texttt{simulator/src/firebase/deviceService.ts}
+
+\begin{quote}
+\textit{The file \texttt{deviceService.ts} contains the main Firebase operations used by the simulator. It includes functions to get floors, get devices, add floors, add rooms, add devices, delete rooms, delete devices, toggle device state, update switch state, update light schedules, update iron max duration, request camera snapshots, trigger device errors, and seed sample data.}
+\end{quote}
+
+\textbf{Important service functions:}
+\begin{itemize}
+    \item \texttt{setDeviceState()} updates device \texttt{state}, \texttt{status}, and \texttt{lastSeen}.
+    \item \texttt{setSwitchState()} updates an individual switch inside a switch panel.
+    \item \texttt{updateDeviceSchedule()} saves light start and end times.
+    \item \texttt{updateIronMaxDuration()} saves the iron auto-shutdown duration.
+    \item \texttt{requestCameraSnapshot()} generates and stores a mock camera snapshot.
+    \item \texttt{triggerDeviceError()} sets a device status to \texttt{ERROR}.
+    \item \texttt{seedSampleData()} creates sample floors, rooms, and devices for a new user.
+\end{itemize}
+
+% ============================================================
+\section{Firebase Backend Script}
+% ============================================================
+
+\subsection{Firebase Configuration}
+\begin{quote}
+\textit{Firebase is the central backend of Luma. It provides Authentication, Realtime Database, and Cloud Functions. The Android app and simulator both connect to Firebase. Firebase Realtime Database stores users, floors, rooms, devices, alerts, reports, and device history.}
+\end{quote}
+
+\subsection{Database Rules}
+\textbf{File:} \texttt{firebase/database.rules.json}
+
+\begin{quote}
+\textit{The database rules file controls read and write permissions for Firebase Realtime Database. In a Firebase-based system, security rules are important because clients connect directly to the database instead of going through a custom backend API.}
+\end{quote}
+
+\subsection{Cloud Function Entry File}
+\textbf{File:} \texttt{firebase/functions/src/index.js}
+
+\begin{quote}
+\textit{The file \texttt{index.js} exports all Firebase Cloud Functions used in the project. These functions are \texttt{ironAutoShutdown}, \texttt{disconnectionDetector}, \texttt{lightScheduler}, \texttt{reportAggregator}, and \texttt{alertNotifier}.}
+\end{quote}
+
+\subsection{Iron Auto-Shutdown Function}
+\textbf{File:} \texttt{firebase/functions/src/ironAutoShutdown.js}
+
+\begin{quote}
+\textit{The iron auto-shutdown function is a safety automation feature. It runs every minute and checks all devices. If a device is an iron, if its state is ON, and if it has been on longer than its configured maximum duration, the function automatically sets the iron state to OFF. It also clears the \texttt{turnedOnAt} value, updates \texttt{lastSeen}, and creates an alert.}
+\end{quote}
+
+\textbf{Corresponding UI section:} Auto Shutdown Timer card in \texttt{DeviceDetailPage.tsx}.
+
+\subsection{Light Scheduler Function}
+\textbf{File:} \texttt{firebase/functions/src/lightScheduler.js}
+
+\begin{quote}
+\textit{The light scheduler function checks smart light devices every minute. It compares the current time with the saved \texttt{startTime} and \texttt{endTime}. If the current time is inside the schedule, the light is turned ON. Otherwise, it is turned OFF.}
+\end{quote}
+
+\textbf{Corresponding UI section:} Auto Schedule card for light devices in \texttt{DeviceDetailPage.tsx}.
+
+\subsection{Disconnection Detector Function}
+\textbf{File:} \texttt{firebase/functions/src/disconnectionDetector.js}
+
+\begin{quote}
+\textit{The disconnection detector checks whether devices have stopped updating their \texttt{lastSeen} timestamp. If a device has not been seen for more than the threshold, the function marks it as \texttt{DISCONNECTED} and creates an alert.}
+\end{quote}
+
+\textbf{Corresponding UI sections:} device status chips, dashboard error count, and logs/alerts page.
+
+\subsection{Report Aggregator Function}
+\textbf{File:} \texttt{firebase/functions/src/reportAggregator.js}
+
+\begin{quote}
+\textit{The report aggregator runs when a device changes from ON to OFF. It calculates how long the device was on, estimates energy consumption using nominal wattage values, writes a history entry, and updates the report data.}
+\end{quote}
+
+\textbf{Corresponding UI section:} device history and reports tabs in \texttt{LogsPage.tsx}.
+
+\subsection{Alert Notifier Function}
+\textbf{File:} \texttt{firebase/functions/src/alertNotifier.js}
+
+\begin{quote}
+\textit{The alert notifier runs when a new alert is created under the \texttt{/alerts} node. It reads the related device name and logs the alert type, message, device, and timestamp. This supports safety and monitoring events in the system.}
+\end{quote}
+
+% ============================================================
+\section{Demonstration Flow}
+% ============================================================
+
+\subsection{Step 1: Show Welcome and Authentication}
 \begin{enumerate}
-    \item \textbf{Electrical Outlet} -- Tap the device icon, show the simple ON/OFF toggle.
-    \item \textbf{Smart Light} -- Toggle ON/OFF, then show the schedule picker (\texttt{startTime}/\texttt{endTime}).
-    \item \textbf{Multi-Switch Panel} -- Show a 3-switch panel; toggle switches independently.
-    \item \textbf{Electric Iron} -- Toggle ON, point out the \texttt{maxDurationMinutes} field (default 30 min). Mention that a Cloud Function monitors elapsed time and auto-shuts it off.
-    \item \textbf{Camera} -- Tap ``Request Snapshot'', show the mock image appearing.
+    \item Open the Android app.
+    \item Show the Welcome Screen.
+    \item Tap Sign In and show the login form.
+    \item Optionally show Sign Up and explain user registration fields.
+    \item Log in and navigate to the dashboard.
 \end{enumerate}
 
-\subsection{Reports Screen (45 seconds)}
-
-\begin{itemize}
-    \item Navigate to Reports from the Dashboard app bar.
-    \item Show the period selector (Daily / Weekly / Monthly).
-    \item Point out the bar chart of device running time and the pie chart of power usage.
-    \item Mention the safety-events log (iron auto-off events, disconnections).
-\end{itemize}
-
-\subsection{Notifications Screen (30 seconds)}
-
-\begin{itemize}
-    \item Navigate to Notifications.
-    \item Show the chronological alert list (e.g., ``Iron automatically turned OFF after 30 minutes'').
-    \item Tap an alert to navigate to the affected device.
-\end{itemize}
-
-% ============================================================
-% ============================================================
-\section{Part 2: Kalana -- Firebase \& Synchronization}
-\label{sec:seg3}
-% ============================================================
-
-\textbf{Presenter:} Kalana \quad |\quad \textbf{Duration:} $\sim$6 minutes
-
-\subsection{Self-Introduction (30 seconds)}
-
-\begin{quote}
-\textit{``Hi, I'm Kalana, index number [Index No.]. My primary responsibilities were Firebase project configuration, the Realtime Database schema design and Security Rules, the realtime synchronization implementation via the Repository pattern, and the device management screens and logic.''}
-\end{quote}
-
-\subsection{Database Schema (1.5 minutes)}
-
-\begin{itemize}
-    \item Open the Firebase Console and show the Realtime Database JSON tree.
-    \item Walk through the five top-level nodes: \texttt{users}, \texttt{floors}, \texttt{devices}, \texttt{alerts}, \texttt{reports}.
-    \item Explain the \textbf{flat device storage} design decision: devices are stored in a flat \texttt{/devices} node and referenced by ID from within \texttt{/floors/\{floorId\}/rooms/\{roomId\}/devices/\{deviceId\}: true}.
-    \item Explain why: ``This follows Firebase's recommended practice of flattening deeply nested data. It keeps individual device listeners lightweight, because subscribing to \texttt{/devices/device001} downloads only that one device's data, not the entire floor or room tree.''
-\end{itemize}
-
-\subsection{Synchronization Mechanism (2 minutes)}
-
-\textbf{Key talking points:}
-
-\begin{itemize}
-    \item The Android app and the React Simulator are \textbf{independent clients} of the same Firebase Realtime Database. They never communicate directly.
-    \item \textbf{On Android}: the \texttt{DeviceRepository} class wraps Firebase's \texttt{ValueEventListener} into a Kotlin \texttt{Flow} using \texttt{callbackFlow}. ViewModels collect this Flow via \texttt{collectAsStateWithLifecycle()}, giving automatic, lifecycle-aware recomposition.
-    \item \textbf{On React}: custom hooks like \texttt{useDeviceState} call Firebase's \texttt{onValue} listener on mount and detach on unmount.
-    \item Listeners are attached at the \textbf{narrowest possible path} -- e.g., Device Details listens only to \texttt{/devices/\{deviceId\}}, not \texttt{/devices}.
-    \item Consistency model: \textbf{eventual consistency with last-write-wins} per field, acceptable for a single-household system.
-    \item Where atomicity is needed (e.g., iron auto-shutdown setting \texttt{state=OFF} and clearing \texttt{turnedOnAt} simultaneously), Firebase's \texttt{multi-path update()} is used.
-\end{itemize}
-
-\textbf{Live demonstration:}
-\begin{quote}
-\textit{``Let me demonstrate bidirectional synchronization. I have the Android app open on this device and the Hardware Simulator open in a browser. Watch -- I'll toggle this Smart Light ON from the Android app...''}
-\end{quote}
+\subsection{Step 2: Show Android Dashboard}
 \begin{enumerate}
-    \item Toggle a device ON from the Android app $\rightarrow$ show it update on the Simulator within $<$1 second.
-    \item Toggle a different device from the Simulator $\rightarrow$ show it update on the Android app within $<$1 second.
-    \item Explain: ``Both writes go through Firebase. When the database value changes, all subscribed listeners fire, and both UIs update automatically.''
+    \item Show the greeting and user name.
+    \item Point to the estimated energy card.
+    \item Show the Smart Home Controller section.
+    \item Explain the floor cards.
+    \item Tap the floating action button and show the Add Floor dialog.
+    \item Tap a floor card to open Floor Details.
 \end{enumerate}
 
-\subsection{Floor Representation (1 minute)}
+\subsection{Step 3: Show Floor Details and Camera Feed}
+\begin{enumerate}
+    \item Show device rows for the selected floor.
+    \item Explain the device icons and status text.
+    \item Tap a camera device.
+    \item Show the Camera Feed Screen.
+    \item Explain live/offline status and snapshot timestamp.
+\end{enumerate}
 
-\begin{itemize}
-    \item Explain the data model for floors:
-    \begin{itemize}
-        \item Each floor has a unique \texttt{floorId}, a \texttt{name}, an \texttt{icon}, and a \texttt{rooms} sub-map.
-        \item Each room has a \texttt{roomId}, a \texttt{name}, and a \texttt{devices} sub-map (device ID references).
-    \end{itemize}
-    \item On the Android side, the Floor Details ViewModel subscribes to \texttt{/floors/\{floorId\}/rooms}. Each room composable further subscribes to its own devices.
-    \item The Floor Plan uses normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) stored on each device record, rendered as tappable icons in a Compose Canvas that scales to any screen size.
-    \item Show the floor plan on the app and point out how device positions correspond to their physical location in the room.
-\end{itemize}
+\subsection{Step 4: Show Simulator Dashboard}
+\begin{enumerate}
+    \item Open the React simulator.
+    \item Log in using Firebase credentials.
+    \item Show the sidebar floor list.
+    \item Select a floor and show room/device sections.
+    \item Toggle a device and show realtime update in Firebase/Android.
+    \item Open a device details page and show type-specific controls.
+\end{enumerate}
 
-\subsection{Security Rules (1 minute)}
+\subsection{Step 5: Demonstrate Device-Specific Features}
+\begin{enumerate}
+    \item For a light, show schedule start and end time.
+    \item For a switch panel, toggle individual switches.
+    \item For an iron, adjust the max duration slider and explain auto-shutdown.
+    \item For a camera, capture a new snapshot.
+    \item Use Simulate Error to show an error status.
+\end{enumerate}
 
-\begin{itemize}
-    \item Briefly show the Security Rules in the Firebase Console.
-    \item Explain: \texttt{/floors} and \texttt{/devices} require authentication for read/write; \texttt{/reports} is read-only for clients (only Cloud Functions can write via Admin SDK).
-    \item Mention that \texttt{.validate} rules enforce required fields (\texttt{type}, \texttt{state}, \texttt{status}) on device writes.
-\end{itemize}
+\subsection{Step 6: Show Logs, Reports, and Alerts}
+\begin{enumerate}
+    \item Open the simulator Logs page.
+    \item Show user activity logs.
+    \item Show device history.
+    \item Show report entries.
+    \item Show alert events generated by automation or simulated errors.
+\end{enumerate}
+
+\subsection{Step 7: Explain Firebase Backend}
+\begin{enumerate}
+    \item Open Firebase Realtime Database.
+    \item Show \texttt{users}, \texttt{floors}, \texttt{devices}, \texttt{alerts}, and \texttt{reports}.
+    \item Explain that devices are stored globally and referenced from rooms.
+    \item Explain Cloud Functions for safety automation and reports.
+\end{enumerate}
 
 % ============================================================
+\section{Closing Script}
 % ============================================================
-\section{Part 3: Sahan -- Simulator \& Cloud Functions}
-\label{sec:seg4}
-% ============================================================
-
-\textbf{Presenter:} Sahan \quad |\quad \textbf{Duration:} $\sim$6 minutes
-
-\subsection{Self-Introduction (30 seconds)}
 
 \begin{quote}
-\textit{``Hello, I'm Sahan, index number [Index No.]. I built the React Hardware Simulator Dashboard, implemented all Firebase Cloud Functions for automation, executed the testing plan, and wrote the project documentation.''}
+\textit{To conclude, Luma demonstrates a complete smart home monitoring and control system using Android, React, Firebase Realtime Database, and Firebase Cloud Functions. The Android app provides the mobile user interface. The React simulator replaces physical IoT hardware. Firebase connects both clients in real time and provides backend automation.}
 \end{quote}
 
-\subsection{Simulator Purpose \& Architecture (1 minute)}
-
-\begin{itemize}
-    \item Explain that the Simulator is a \textbf{completely separate React web application}; it is not part of the Android app and is not distributed to end users.
-    \item Its purpose is to stand in for physical IoT hardware during development and demonstration.
-    \item It writes realistic, time-varying state data into the same Firebase Realtime Database that the Android app reads from.
-    \item From Firebase's perspective, data from the Simulator is \textbf{indistinguishable} from data that would come from real hardware.
-    \item Tech stack: React, Vite, Material UI, Firebase JavaScript SDK.
-\end{itemize}
-
-\subsection{Simulator Operations Demo (2 minutes)}
-
-\begin{itemize}
-    \item Show the Simulator dashboard layout:
-    \begin{itemize}
-        \item \textbf{Navbar} -- title and Firebase connection status indicator.
-        \item \textbf{Sidebar} -- floor navigation (Ground Floor, First Floor, etc.).
-        \item \textbf{Device Cards} -- one per device, each with a Status Chip and Toggle Button.
-    \end{itemize}
-    \item Demonstrate toggling a device from the Simulator:
-    \begin{quote}
-    \textit{``When I click this Toggle button on the Kitchen Outlet card, it writes directly to \texttt{/devices/device002/state} in Firebase. The Android app's listener fires, and the outlet shows as ON on the phone within a fraction of a second.''}
-    \end{quote}
-    \item Show the \textbf{heartbeat mechanism}: each simulated device periodically writes a \texttt{lastSeen} timestamp, enabling the disconnection-detection Cloud Function.
-    \item Demonstrate simulating a \textbf{device error}: use the developer control to set a device to \texttt{ERROR} state. Show the red status chip in the Simulator and the corresponding alert appearing on the Android app.
-    \item Demonstrate simulating a \textbf{device disconnection}: stop the heartbeat for a device and show the \texttt{DISCONNECTED} status appearing after the threshold is exceeded.
-    \item Show the Camera device returning a mock image on snapshot request.
-\end{itemize}
-
-\subsection{Cloud Functions (2 minutes)}
-
-\begin{itemize}
-    \item Explain the role of Cloud Functions: the \textbf{only server-side logic} in Luma. They execute in Google's managed Node.js runtime in response to database triggers and scheduled events -- \textbf{not} HTTP requests.
-    \item Walk through the four Cloud Functions:
-    \begin{enumerate}
-        \item \textbf{Iron Auto-Shutdown} -- A scheduled function (runs every 1 minute) that checks all iron devices. If \texttt{state === ``ON''} and elapsed time exceeds \texttt{maxDurationMinutes}, it atomically sets \texttt{state = OFF}, clears \texttt{turnedOnAt}, writes an alert to \texttt{/alerts}, and sends a push notification via FCM.
-        \item \textbf{Disconnection Detector} -- Compares each device's \texttt{lastSeen} against the current time; marks as \texttt{DISCONNECTED} if threshold exceeded.
-        \item \textbf{Smart Light Scheduler} -- Evaluates each light's \texttt{startTime}/\texttt{endTime} and toggles state accordingly.
-        \item \textbf{Report Aggregator} -- Triggered on new \texttt{history} entries; recomputes daily/weekly/monthly totals under \texttt{/reports}.
-    \end{enumerate}
-    \item \textbf{Live demo of iron auto-shutdown}:
-    \begin{quote}
-    \textit{``For demonstration purposes, I've set the iron's maximum duration to 1 minute. Let me turn it ON from the Simulator... [wait]... and there -- the Cloud Function has detected the timeout, set the iron to OFF, and a push notification has just arrived on the Android device.''}
-    \end{quote}
-\end{itemize}
-
-\subsection{Testing Summary (30 seconds)}
-
-\begin{itemize}
-    \item Briefly mention the testing categories used: unit tests (ViewModels, hooks), UI tests (Compose, React Testing Library), integration tests (Repository against Firebase), synchronization tests (cross-client latency), Security Rules tests (Emulator Suite), and Cloud Function tests.
-    \item State that all test cases passed successfully.
-\end{itemize}
-
-% ============================================================
-\section{Segment 5 -- Wrap-Up}
-\label{sec:seg5}
-% ============================================================
-
-\textbf{Presenters:} All three members \quad |\quad \textbf{Duration:} $\sim$3 minutes
-
-\subsection{Summary (1 minute)}
-
 \begin{quote}
-\textit{``To summarise, Luma demonstrates that a fully functional, realtime, multi-client smart home platform can be built using a purely serverless, Firebase-centric architecture -- without a custom REST API, a dedicated server, or physical IoT hardware.''}
-\end{quote}
-
-Key points to reiterate:
-\begin{itemize}
-    \item The Android app and Hardware Simulator are independent clients sharing a Firebase Realtime Database.
-    \item Bidirectional synchronization with sub-second latency.
-    \item Safety automation via Cloud Functions (iron auto-shutdown).
-    \item Clean MVVM architecture on Android with Jetpack Compose.
-    \item Five device types with distinct behaviours (Outlet, Light, Switch Panel, Iron, Camera).
-\end{itemize}
-
-\subsection{Future Improvements (1 minute)}
-
-Each member briefly mentions one future direction:
-\begin{itemize}
-    \item \textbf{Blhewa:} ``Voice assistant integration with Google Assistant and Alexa.''
-    \item \textbf{Kalana:} ``Replacing the simulator with real ESP32 hardware over MQTT, with zero changes to the Android app.''
-    \item \textbf{Sahan:} ``AI-driven energy optimization using historical usage data.''
-\end{itemize}
-
-\subsection{Closing (1 minute)}
-
-\begin{quote}
-\textit{``Thank you for watching our demonstration. Our source code is available on GitHub at [URL], and the final APK can be downloaded from [URL]. The technical documentation is included in the repository's docs folder. We welcome any questions or feedback.''}
+\textit{Through this project, we demonstrated mobile application development using Kotlin and Jetpack Compose, web-based hardware simulation using React, realtime synchronization using Firebase, and automation using Firebase Cloud Functions. Luma is therefore a practical and testable smart home system suitable for our mobile application development assignment. Thank you.}
 \end{quote}
 
 % ============================================================
-\section{Technical Documentation Summary}
-\label{sec:techdoc}
+\section{Quick Presentation Checklist}
 % ============================================================
 
-This section provides the concise technical documentation required by the submission guidelines, covering the synchronization mechanism, floor representation, and simulator operations.
-
-\subsection{Synchronization Mechanism}
-
-\subsubsection{Architecture}
-Luma uses a \textbf{bidirectional, Firebase-mediated synchronization model}. The Android application and the React Hardware Simulator are completely independent clients that never communicate directly. Both read from and write to the same Firebase Realtime Database, which acts as the single source of truth.
-
-\subsubsection{Android-Side Implementation}
-\begin{itemize}
-    \item The \texttt{DeviceRepository} class wraps Firebase's \texttt{ValueEventListener} and \texttt{ChildEventListener} APIs into Kotlin \texttt{Flow} objects using \texttt{callbackFlow}.
-    \item ViewModels collect these Flows using \texttt{collectAsStateWithLifecycle()}, providing automatic, lifecycle-aware UI recomposition.
-    \item Listeners are attached at the narrowest database path needed (e.g., \texttt{/devices/\{deviceId\}} for Device Details).
-\end{itemize}
-
-\subsubsection{Simulator-Side Implementation}
-\begin{itemize}
-    \item Custom React hooks (e.g., \texttt{useDeviceState}) call Firebase's \texttt{onValue} listener on component mount and detach on unmount.
-    \item Device state changes are written directly to the corresponding \texttt{/devices/\{deviceId\}/state} path.
-\end{itemize}
-
-\subsubsection{Consistency Model}
-\begin{itemize}
-    \item \textbf{Eventual consistency with last-write-wins} semantics per field.
-    \item Atomic multi-field updates use Firebase's \texttt{multi-path update()} (e.g., iron shutdown sets \texttt{state=OFF} and clears \texttt{turnedOnAt} atomically).
-\end{itemize}
-
-\subsection{Floor Representation}
-
-\subsubsection{Data Model}
-\begin{itemize}
-    \item Floors are stored under \texttt{/floors/\{floorId\}} with fields: \texttt{name}, \texttt{icon}, and a \texttt{rooms} sub-map.
-    \item Each room under \texttt{/floors/\{floorId\}/rooms/\{roomId\}} has a \texttt{name} and a \texttt{devices} sub-map containing device ID references (\texttt{deviceId: true}).
-    \item Devices themselves are stored \textbf{flat} under \texttt{/devices/\{deviceId\}} (denormalized), following Firebase best practices to keep listeners lightweight.
-\end{itemize}
-
-\subsubsection{Android Rendering}
-\begin{itemize}
-    \item \textbf{Floor Details} screen renders rooms as a responsive grid using \texttt{LazyVerticalGrid}.
-    \item \textbf{Floor Plan} screen renders a 2D spatial view where devices are positioned using normalised \texttt{x}/\texttt{y} coordinates (0.0--1.0) stored on the device record.
-    \item Device icons reflect live state (e.g., amber glow for ON lights).
-    \item The ViewModel subscribes to the floor's rooms node; each room composable subscribes to its own devices.
-\end{itemize}
-
-\subsection{Simulator Operations}
-
-\subsubsection{Purpose}
-The Hardware Simulator is a standalone React web application that emulates physical IoT hardware. It writes realistic state data into Firebase, indistinguishable from data that real devices would produce.
-
-\subsubsection{Key Operations}
-\begin{longtable}{@{}p{4cm}p{9.5cm}@{}}
+\begin{longtable}{@{}p{0.8cm}p{11.2cm}p{1.2cm}@{}}
 \toprule
-\textbf{Operation} & \textbf{Description} \\
+\textbf{\#} & \textbf{Item} & \textbf{Done} \\
 \midrule
-Device Toggle & Writes directly to \texttt{/devices/\{id\}/state}, triggering listeners on all clients. \\
-Heartbeat & Each device periodically writes a \texttt{lastSeen} timestamp, exercising the disconnection-detection Cloud Function. \\
-Error Simulation & A developer control sets a device's status to \texttt{ERROR}, testing the Android app's error-handling UI and alert generation. \\
-Disconnection Simulation & Stopping a device's heartbeat causes the Cloud Function to mark it as \texttt{DISCONNECTED} after the threshold. \\
-Camera Snapshot & Returns a pre-defined mock image, written to \texttt{lastSnapshotUrl}. \\
+\endhead
+1 & Introduce project name, module, and purpose. & $\square$ \\
+2 & Explain Android, simulator, and Firebase architecture. & $\square$ \\
+3 & Show Android Welcome, Sign In, and Sign Up screens. & $\square$ \\
+4 & Show Android Dashboard and floor cards. & $\square$ \\
+5 & Show Android Floor Details and Camera Feed screens. & $\square$ \\
+6 & Show simulator login and floor overview dashboard. & $\square$ \\
+7 & Show simulator device detail controls. & $\square$ \\
+8 & Demonstrate realtime synchronization through Firebase. & $\square$ \\
+9 & Explain \texttt{deviceService.ts} Firebase operations. & $\square$ \\
+10 & Explain Cloud Functions and their corresponding UI sections. & $\square$ \\
+11 & Show logs, reports, and alerts in the simulator. & $\square$ \\
+12 & Finish with conclusion and future potential. & $\square$ \\
 \bottomrule
-\end{longtable}
-
-\subsubsection{Dashboard Layout}
-The Simulator UI consists of a Navbar (title + connection status), a Sidebar (floor navigation), and a main grid of Device Cards. Each card displays a Status Chip (ON/OFF/ERROR/DISCONNECTED) and a Toggle Button for manual control.
-
-% ============================================================
-\section{Presentation Checklist}
-% ============================================================
-
-\begin{longtable}{@{}p{0.6cm}p{10cm}p{2cm}@{}}
-\toprule
-\textbf{\#} & \textbf{Item} & \textbf{Done?} \\
-\midrule
-1 & All three members appear on camera with self-introduction & $\square$ \\
-2 & Each member states their name, index number, and contribution & $\square$ \\
-3 & Architecture overview presented (3-component diagram) & $\square$ \\
-4 & Android app demo: all 10 screens shown & $\square$ \\
-5 & All 5 device types demonstrated & $\square$ \\
-6 & Bidirectional synchronization demonstrated live & $\square$ \\
-7 & Firebase database structure shown in Console & $\square$ \\
-8 & Floor representation explained (flat devices, normalised coords) & $\square$ \\
-9 & Simulator dashboard walkthrough completed & $\square$ \\
-10 & Iron auto-shutdown Cloud Function demonstrated live & $\square$ \\
-11 & Push notification received on Android during demo & $\square$ \\
-12 & GitHub repository URL shared & $\square$ \\
-13 & Final APK download link shared & $\square$ \\
-14 & Video does not exceed 25 minutes & $\square$ \\
-\bottomrule
+\caption{Presentation checklist.}
+\label{tab:presentation-checklist}
 \end{longtable}
 
 \end{document}
